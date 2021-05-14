@@ -5,6 +5,9 @@ Download Apk from here (master branch) : https://github.com/shubh3483/Gallery-Ap
 
 Switch to 6.2.2 from here : https://github.com/shubh3483/Gallery-App/tree/6.2.2
 
+If you want to download the app that will save the data also switch to : https://github.com/shubh3483/Gallery-App/tree/6.2.2
+and download the Apk from readme file.
+
 A video is also attached below for the reference
 
 https://user-images.githubusercontent.com/65455693/117861261-ddca2c00-b2ae-11eb-9de8-b422ad2922d8.mp4
