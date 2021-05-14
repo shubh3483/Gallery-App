@@ -5,12 +5,13 @@ import android.graphics.Bitmap;
 
 public class Item {
 
-    public Bitmap bitmap;
+    public String bitmapAsString;
     public int color;
     public String label;
 
-    public Item(Bitmap bitmap, int color, String label) {
-        this.bitmap = bitmap;
+
+    public Item(String bitmapAsString, int color, String label) {
+        this.bitmapAsString = bitmapAsString;
         this.color = color;
         this.label = label;
     }

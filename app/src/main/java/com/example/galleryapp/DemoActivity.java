@@ -10,6 +10,7 @@ import com.example.galleryapp.databinding.ActivityDemoBinding;
 import com.example.galleryapp.databinding.ChipColourBinding;
 import com.example.galleryapp.databinding.ChipLabelBinding;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Set;
 
@@ -21,20 +22,24 @@ public class DemoActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         b = ActivityDemoBinding.inflate(getLayoutInflater());
         setContentView(b.getRoot());
-        new ItemHelper()
-                .fetchData(1920, 1080, getApplicationContext(), new ItemHelper.OnCompleteListener() {
-                    @Override
-                    public void onFetched(Bitmap bitmap, Set<Integer> colors, List<String> labels) {
-                        b.imageView.setImageBitmap(bitmap);
-                        inflateColourChips(colors);
-                        inflateLabelChips(labels);
-                    }
+        try {
+            new ItemHelper()
+                    .fetchData(1920, 1080, getApplicationContext(), new ItemHelper.OnCompleteListener() {
+                        @Override
+                        public void onFetched(Bitmap bitmap, Set<Integer> colors, List<String> labels) {
+                            b.imageView.setImageBitmap(bitmap);
+                            inflateColourChips(colors);
+                            inflateLabelChips(labels);
+                        }
 
-                    @Override
-                    public void setError(String error) {
+                        @Override
+                        public void setError(String error) {
 
-                    }
-                });
+                        }
+                    });
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
 

@@ -9,6 +9,7 @@ import androidx.annotation.Nullable;
 import androidx.palette.graphics.Palette;
 
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.request.target.CustomTarget;
 import com.bumptech.glide.request.transition.Transition;
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -21,6 +22,11 @@ import com.google.mlkit.vision.label.ImageLabeler;
 import com.google.mlkit.vision.label.ImageLabeling;
 import com.google.mlkit.vision.label.defaults.ImageLabelerOptions;
 
+import java.io.IOException;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.net.URLConnection;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -34,24 +40,41 @@ public class ItemHelper {
     String squareImageURL = "https://picsum.photos/%d";
     private Bitmap bitmap;
     private Set<Integer> colors;
+    private String finalRedirectedUrl = "";
 
-    void fetchData(int x, int y, Context context, OnCompleteListener listener){
+
+    /**
+     * The below two "fetchData" methods will create particular URL and it will call fetchImage
+     * methods.
+     * @param x
+     * @param y
+     * @param context
+     * @param listener
+     * @throws IOException
+     */
+    void fetchData(int x, int y, Context context, OnCompleteListener listener) throws IOException {
         this.context = context;
-
         this.listener = listener;
         fetchImage(String.format(rectangleImageURL, x, y));
     }
 
-    void fetchData(int x, Context context, OnCompleteListener listener){
+    void fetchData(int x, Context context, OnCompleteListener listener) throws IOException {
         this.context = context;
 
         this.listener = listener;
         fetchImage(String.format(squareImageURL, x));
     }
 
-    void fetchImage(String url){
+    /**
+     * This method will fetch image according to the URL passed into it.
+     * @param url
+     * @throws IOException
+     */
+    void fetchImage(String url) throws IOException {
         Glide.with(context)
                 .asBitmap()
+                .skipMemoryCache(true)
+                .diskCacheStrategy(DiskCacheStrategy.NONE)
                 .load(url)
                 .into(new CustomTarget<Bitmap>() {
                     @Override
@@ -67,6 +90,7 @@ public class ItemHelper {
                 });
     }
 
+
     private void extractPaletteFromBitmap() {
         Palette.from(bitmap).generate(new Palette.PaletteAsyncListener() {
             public void onGenerated(Palette p) {
@@ -76,6 +100,9 @@ public class ItemHelper {
         });
     }
 
+    /**
+     * This method will extract labels from the bitmap
+     */
     private void labelImage() {
         InputImage image = InputImage.fromBitmap(bitmap, 0);
         ImageLabeler labeler = ImageLabeling.getClient(ImageLabelerOptions.DEFAULT_OPTIONS);
@@ -98,6 +125,12 @@ public class ItemHelper {
                 });
     }
 
+
+    /**
+     * This method will fetch all the colors from the bitmap
+     * @param p
+     * @return
+     */
     private Set<Integer> getColoursFromPalette(Palette p) {
         Set<Integer> colors = new HashSet<>();
 
