@@ -7,3 +7,5 @@ Download Apk from here : https://github.com/shubh3483/Gallery-App/releases/downl
 Switch to master branch : https://github.com/shubh3483/Gallery-App/tree/master
 
 A video is also attached for the reference 
+
+https://user-images.githubusercontent.com/65455693/118253007-0d538100-b4c7-11eb-95cc-1399fbe426f2.mp4
