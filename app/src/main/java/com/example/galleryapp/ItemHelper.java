@@ -35,6 +35,14 @@ public class ItemHelper {
     private Bitmap bitmap;
     private Set<Integer> colors;
 
+    /**
+     * The below two methods will create url according to the entered dimensions and will call the
+     * fetchImage method to fetch the image.
+     * @param x
+     * @param y
+     * @param context
+     * @param listener
+     */
     void fetchData(int x, int y, Context context, OnCompleteListener listener){
         this.context = context;
 
@@ -49,6 +57,10 @@ public class ItemHelper {
         fetchImage(String.format(squareImageURL, x));
     }
 
+    /**
+     * This method will fetch the image.
+     * @param url
+     */
     void fetchImage(String url){
         Glide.with(context)
                 .asBitmap()
@@ -67,6 +79,9 @@ public class ItemHelper {
                 });
     }
 
+    /**
+     * This function will call other methods to retrieve colors and labels.
+     */
     private void extractPaletteFromBitmap() {
         Palette.from(bitmap).generate(new Palette.PaletteAsyncListener() {
             public void onGenerated(Palette p) {
@@ -76,6 +91,10 @@ public class ItemHelper {
         });
     }
 
+    /**
+     * This method will retrieve labels for the image and will send a callback to another method in
+     * AddImageDialog class
+     */
     private void labelImage() {
         InputImage image = InputImage.fromBitmap(bitmap, 0);
         ImageLabeler labeler = ImageLabeling.getClient(ImageLabelerOptions.DEFAULT_OPTIONS);
@@ -98,6 +117,11 @@ public class ItemHelper {
                 });
     }
 
+    /**
+     * This is extracting colors from the image.
+     * @param p
+     * @return
+     */
     private Set<Integer> getColoursFromPalette(Palette p) {
         Set<Integer> colors = new HashSet<>();
 
@@ -116,6 +140,9 @@ public class ItemHelper {
         return colors;
     }
 
+    /**
+     * Listener for this activity.
+     */
     interface OnCompleteListener{
         void onFetched(Bitmap bitmap, Set<Integer> colors, List<String> labels);
         void setError(String error);

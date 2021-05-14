@@ -26,12 +26,22 @@ public class MainActivity extends AppCompatActivity {
         setContentView(b.getRoot());
     }
 
+    /**
+     * This method will inflate our menu resource file.
+     * @param menu
+     * @return
+     */
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.gallery_app, menu);
         return true;
     }
 
+    /**
+     * This method will show a refresh button in our main activity.
+     * @param item
+     * @return
+     */
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         if(item.getItemId() == R.id.addImage){
@@ -41,6 +51,9 @@ public class MainActivity extends AppCompatActivity {
         return false;
     }
 
+    /**
+     * It will take the callback from other method when the final image, color and label is ready.
+     */
     private void showAddImageDialog() {
         new AddImageDialog()
                 .show(this, new AddImageDialog.OnCompleteListener() {
@@ -59,6 +72,10 @@ public class MainActivity extends AppCompatActivity {
                 });
     }
 
+    /**
+     * This function will add the item card into the list.
+     * @param item
+     */
     private void inflateViewForItem(Item item) {
 
         //Inflate Layout
@@ -72,6 +89,4 @@ public class MainActivity extends AppCompatActivity {
         //Add it to the list
         b.list.addView(binding.getRoot());
     }
-
-
 }

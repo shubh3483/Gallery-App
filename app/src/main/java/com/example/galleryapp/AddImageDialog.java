@@ -35,6 +35,11 @@ public class AddImageDialog implements ItemHelper.OnCompleteListener {
     private Bitmap image;
     private AlertDialog dialog;
 
+    /**
+     * This method will show the initial dialog
+     * @param context
+     * @param listener
+     */
     void show(Context context, OnCompleteListener listener){
         this.context = context;
         this.listener = listener;
@@ -56,25 +61,9 @@ public class AddImageDialog implements ItemHelper.OnCompleteListener {
             hideErrorsForET();
     }
 
-    private void hideErrorsForET() {
-        b.width.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-
-            }
-
-            @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {
-                b.width.setError(null);
-            }
-
-            @Override
-            public void afterTextChanged(Editable s) {
-
-            }
-        });
-    }
-
+    /**
+     * This method will handle the dimensions entered by the user.
+     */
     private void handleDimensionsInput() {
 
         b.fetchImageBtn.setOnClickListener(new View.OnClickListener() {
@@ -109,10 +98,13 @@ public class AddImageDialog implements ItemHelper.OnCompleteListener {
         });
     }
 
-    private void hideKeyboard() {
-        InputMethodManager imm = (InputMethodManager) context.getSystemService(Activity.INPUT_METHOD_SERVICE);
-
-        imm.hideSoftInputFromWindow(b.width.getWindowToken(), 0);
+    /**
+     * These are the overloaded methods to fetch image according to the input entered by the user.
+     * @param height
+     */
+    private void fetchRandomImage(int height) {
+        new ItemHelper()
+                .fetchData(height, context, this);
     }
 
     private void fetchRandomImage(int width, int height) {
@@ -120,6 +112,12 @@ public class AddImageDialog implements ItemHelper.OnCompleteListener {
                 .fetchData(width, height, context, this);
     }
 
+    /**
+     * This will show a dialog with the final image, color and label chips.
+     * @param image
+     * @param colors
+     * @param labels
+     */
     private void showData(Bitmap image, Set<Integer> colors, List<String> labels) {
         this.image = image;
         b.imageView.setImageBitmap(image);
@@ -132,6 +130,28 @@ public class AddImageDialog implements ItemHelper.OnCompleteListener {
         handleAddImageEvent();
     }
 
+    /**
+     * This will add a label chip with custom tag and will handle the edit text accordingly.
+     */
+    private void handleCustomInputLayout() {
+        ChipLabelBinding binding = ChipLabelBinding.inflate(inflater);
+        binding.getRoot().setText("Custom");
+        b.labelChipGrp.addView(binding.getRoot());
+
+        binding.getRoot().setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                b.customInput.setVisibility(isChecked ? View.VISIBLE : View.GONE);
+                isCustomLabel = isChecked;
+
+            }
+        });
+    }
+
+    /**
+     * Finally this method will send a callback to our MainActivity sending the final image, color
+     * and label along with the custom label(if the user has entered it.)
+     */
     private void handleAddImageEvent() {
         b.addBtn.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -162,22 +182,11 @@ public class AddImageDialog implements ItemHelper.OnCompleteListener {
         });
     }
 
-    private void handleCustomInputLayout() {
-        ChipLabelBinding binding = ChipLabelBinding.inflate(inflater);
-        binding.getRoot().setText("Custom");
-        b.labelChipGrp.addView(binding.getRoot());
 
-        binding.getRoot().setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                b.customInput.setVisibility(isChecked ? View.VISIBLE : View.GONE);
-                isCustomLabel = isChecked;
-
-            }
-        });
-    }
-
-
+    /**
+     * These method will inflate the color and label chip groups and add the color and label chips
+     * @param labels
+     */
     private void inflateLabelChips(List<String> labels) {
         for(String label : labels){
             ChipLabelBinding binding = ChipLabelBinding.inflate(inflater);
@@ -185,8 +194,6 @@ public class AddImageDialog implements ItemHelper.OnCompleteListener {
             b.labelChipGrp.addView(binding.getRoot());
         }
     }
-
-
 
     private void inflateColourChips(Set<Integer> colors) {
         for(int colour : colors){
@@ -196,11 +203,12 @@ public class AddImageDialog implements ItemHelper.OnCompleteListener {
         }
     }
 
-    private void fetchRandomImage(int height) {
-        new ItemHelper()
-                .fetchData(height, context, this);
-    }
-
+    /**
+     * THese are the callbacks from the ItemHelper class
+     * @param image
+     * @param colors
+     * @param labels
+     */
     @Override
     public void onFetched(Bitmap image, Set<Integer> colors, List<String> labels) {
 
@@ -213,6 +221,40 @@ public class AddImageDialog implements ItemHelper.OnCompleteListener {
         listener.onError(error);
     }
 
+    /**
+     * This will hide the keyboard once the user has entered the dimensions.
+     */
+    private void hideKeyboard() {
+        InputMethodManager imm = (InputMethodManager) context.getSystemService(Activity.INPUT_METHOD_SERVICE);
+
+        imm.hideSoftInputFromWindow(b.width.getWindowToken(), 0);
+    }
+
+    /**
+     * This function will hide errors for the Edit Text
+     */
+    private void hideErrorsForET() {
+        b.width.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                b.width.setError(null);
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+
+            }
+        });
+    }
+
+    /**
+     * Listener for this class.
+     */
     interface OnCompleteListener{
         void onImageAdded(Item item);
         void onError(String error);
