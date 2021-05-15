@@ -6,8 +6,13 @@ import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.os.PersistableBundle;
 import android.util.Base64;
+import android.view.ContextMenu;
 import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.AdapterView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
@@ -38,6 +43,7 @@ public class MainActivity extends AppCompatActivity {
         setContentView(b.getRoot());
         Gson gson = new Gson();
         if(savedInstanceState != null){
+            b.initialTV.setVisibility(View.GONE);
             String json = savedInstanceState.getString(Constants.ALL_ITEMS);
             allItems = gson.fromJson(json, new TypeToken<List<Item>>() {
             }.getType());
@@ -62,6 +68,7 @@ public class MainActivity extends AppCompatActivity {
             }
             else{
                 allItems = new ArrayList<>();
+                //b.initialTV.setVisibility(View.VISIBLE);
             }
         }else{
             SharedPreferences preferences = getPreferences(MODE_PRIVATE);
@@ -69,6 +76,7 @@ public class MainActivity extends AppCompatActivity {
             allItems = gson.fromJson(json, new TypeToken<List<Item>>() {
             }.getType());
             if(allItems != null){
+                b.initialTV.setVisibility(View.GONE);
                 for(Item item : allItems){
                     try {
                         byte[] encodeByte = Base64.decode(item.bitmapAsString, Base64.DEFAULT);
@@ -91,6 +99,7 @@ public class MainActivity extends AppCompatActivity {
                 allItems = new ArrayList<>();
             }
         }
+        unregisterForContextMenu(b.list);
     }
 
     /**
@@ -163,9 +172,33 @@ public class MainActivity extends AppCompatActivity {
         binding.title.setText(item.label);
         binding.title.setBackgroundColor(item.color);
 
+
+        b.initialTV.setVisibility(View.GONE);
+
         //Add it to the list
         b.list.addView(binding.getRoot());
     }
+
+
+    /*@Override
+    public void onCreateContextMenu(ContextMenu menu, View v,
+                                    ContextMenu.ContextMenuInfo menuInfo) {
+        super.onCreateContextMenu(menu, v, menuInfo);
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.gallery_app, menu);
+    }
+
+    @Override
+    public boolean onContextItemSelected(@NonNull MenuItem item) {
+        AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo) item.getMenuInfo();
+        switch (item.getItemId()){
+            case R.id.editCard : Toast.makeText(getApplicationContext(), "editing", Toast.LENGTH_SHORT).show();
+                return true;
+            case R.id.deleteCard : Toast.makeText(getApplicationContext(), "Deleting", Toast.LENGTH_SHORT).show();
+                return true;
+        }
+            return super.onContextItemSelected(item);
+    }*/
 
     /**
      * This method will save the item card so that when the screen is rotated the data is not lost.
