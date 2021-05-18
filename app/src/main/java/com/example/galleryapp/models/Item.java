@@ -1,17 +1,14 @@
 package com.example.galleryapp.models;
 
-import android.accessibilityservice.GestureDescription;
-import android.graphics.Bitmap;
-
 public class Item {
 
-    public String bitmapAsString;
+    public String imageRedirectedUrl;
     public int color;
     public String label;
 
 
-    public Item(String bitmapAsString, int color, String label) {
-        this.bitmapAsString = bitmapAsString;
+    public Item(String imageRedirectedUrl, int color, String label) {
+        this.imageRedirectedUrl = imageRedirectedUrl;
         this.color = color;
         this.label = label;
     }

@@ -15,6 +15,7 @@ import android.widget.Toast;
 
 import androidx.appcompat.app.AlertDialog;
 
+import com.bumptech.glide.Glide;
 import com.example.galleryapp.databinding.ActivityDemoBinding;
 import com.example.galleryapp.databinding.ChipColourBinding;
 import com.example.galleryapp.databinding.ChipLabelBinding;
@@ -36,6 +37,7 @@ public class AddImageDialog implements ItemHelper.OnCompleteListener {
     private LayoutInflater inflater;
     private boolean isCustomLabel;
     private Bitmap image;
+    private String redirectedUrl = "";
     private AlertDialog dialog;
 
     void show(Context context, OnCompleteListener listener){
@@ -156,13 +158,18 @@ public class AddImageDialog implements ItemHelper.OnCompleteListener {
     /**
      * After we got the image, colors and labels by taking it from the callback we will show the
      * final image color chips and label chips and ask the user to choose from them.
-     * @param image
+     *
      * @param colors
      * @param labels
      */
-    private void showData(Bitmap image, Set<Integer> colors, List<String> labels) {
-        this.image = image;
-        b.imageView.setImageBitmap(image);
+    private void showData(String redirectedUrl, Set<Integer> colors, List<String> labels) {
+        //this.image = image;
+        this.redirectedUrl = redirectedUrl;
+        Glide.with(context)
+                .asBitmap()
+                .load(redirectedUrl)
+                .into(b.imageView);
+        //b.imageView.setImageBitmap(image);
         inflateColourChips(colors);
         inflateLabelChips(labels);
         b.progressIndicatorRoot.setVisibility(View.GONE);
@@ -217,12 +224,12 @@ public class AddImageDialog implements ItemHelper.OnCompleteListener {
                     label = ((Chip)b.labelChipGrp.findViewById(labelChipId)).getText().toString();
                 }
                 int color = ((Chip)b.colourPaletteChipGrp.findViewById(colorChipId)).getChipBackgroundColor().getDefaultColor();
-                ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                /*ByteArrayOutputStream baos = new ByteArrayOutputStream();
                 image.compress(Bitmap.CompressFormat.PNG, 100, baos);
                 byte[] b = baos.toByteArray();
-                String temp = Base64.encodeToString(b, Base64.DEFAULT);
+                String temp = Base64.encodeToString(b, Base64.DEFAULT);*/
 
-                listener.onImageAdded(new Item(temp, color, label));
+                listener.onImageAdded(new Item(redirectedUrl, color, label));
                 dialog.dismiss();
             }
         });
@@ -251,14 +258,14 @@ public class AddImageDialog implements ItemHelper.OnCompleteListener {
 
     /**
      * The below two methods are listener of ItemHelper class.
-     * @param image
+     *
      * @param colors
      * @param labels
      */
     @Override
-    public void onFetched(Bitmap image, Set<Integer> colors, List<String> labels) {
+    public void onFetched(String redirectedUrl, Set<Integer> colors, List<String> labels) {
 
-        showData(image, colors, labels);
+        showData(redirectedUrl, colors, labels);
     }
 
     @Override
