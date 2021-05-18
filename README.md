@@ -8,4 +8,6 @@ Switch to master branch : https://github.com/shubh3483/Gallery-App/tree/master
 
 A video is also attached for the reference 
 
-https://user-images.githubusercontent.com/65455693/118253007-0d538100-b4c7-11eb-95cc-1399fbe426f2.mp4
+
+https://user-images.githubusercontent.com/65455693/118681923-9cd99680-b81d-11eb-8d52-c1afaab84733.mp4
+
