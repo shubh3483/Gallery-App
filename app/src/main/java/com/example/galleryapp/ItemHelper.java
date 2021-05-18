@@ -3,6 +3,7 @@ package com.example.galleryapp;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
+import android.net.Uri;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -20,7 +21,6 @@ import com.google.mlkit.vision.label.ImageLabeling;
 import com.google.mlkit.vision.label.defaults.ImageLabelerOptions;
 
 import java.io.IOException;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -34,8 +34,8 @@ public class ItemHelper /*extends AsyncTask<Void, Void, Void>*/{
     String squareImageURL = "https://picsum.photos/%d";
     private Bitmap bitmap;
     private Set<Integer> colors;
-    String globalFinalUrl = "";
-
+    String globalFinalUrl = null;
+    Uri uri = null;
 
 
     /**
@@ -65,7 +65,7 @@ public class ItemHelper /*extends AsyncTask<Void, Void, Void>*/{
      */
     void fetchImage(String url) {
 
-        new RedirectedUrl().getRedirectedUrl(new RedirectedUrl.OnCompleteListener() {
+        new RedirectedUrlHelper().getRedirectedUrl(new RedirectedUrlHelper.OnCompleteListener() {
             @Override
             public void onFetched(String fetchedUrl) {
                 globalFinalUrl = fetchedUrl;
@@ -88,6 +88,32 @@ public class ItemHelper /*extends AsyncTask<Void, Void, Void>*/{
         }).execute(url);
     }
 
+    /**
+     * This method will fetch the image with the uri passed in it and will fetch the color and labels
+     * according to the added image.
+     * @param uri
+     * @param context
+     * @param listener
+     */
+    public void fetchGalleryImage(Uri uri, Context context, OnCompleteListener listener){
+        this.uri = uri;
+        this.listener = listener;
+        Glide.with(context)
+                .asBitmap()
+                .load(uri)
+                .into(new CustomTarget<Bitmap>() {
+                    @Override
+                    public void onResourceReady(@NonNull Bitmap resource, @Nullable Transition<? super Bitmap> transition) {
+                        bitmap = resource;
+                        extractPaletteFromBitmap();
+                    }
+
+                    @Override
+                    public void onLoadCleared(@Nullable Drawable placeholder) {
+
+                    }
+                });
+    }
 
     /**
      * This method will extract the color palette from the bitmap.
@@ -115,7 +141,12 @@ public class ItemHelper /*extends AsyncTask<Void, Void, Void>*/{
                         for(ImageLabel label : labels){
                             strings.add(label.getText());
                         }
-                        listener.onFetched(globalFinalUrl,colors,strings);
+                        if(uri != null){
+                            System.out.println(uri);
+                            listener.onFetched(uri,colors,strings);
+                        }
+
+                        else listener.onFetched(globalFinalUrl,colors,strings);
                     }
                 })
                 .addOnFailureListener(new OnFailureListener() {
@@ -153,6 +184,7 @@ public class ItemHelper /*extends AsyncTask<Void, Void, Void>*/{
 
 
     interface OnCompleteListener{
+        void onFetched(Uri uri, Set<Integer> colors, List<String> labels);
         void onFetched(String redirectedUrl, Set<Integer> colors, List<String> labels);
         void setError(String error);
     }

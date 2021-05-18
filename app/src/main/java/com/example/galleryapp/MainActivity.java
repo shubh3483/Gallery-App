@@ -1,12 +1,15 @@
 package com.example.galleryapp;
 
+import android.annotation.SuppressLint;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
+import android.net.Uri;
 import android.os.Bundle;
-import android.util.Base64;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
@@ -22,13 +25,15 @@ import com.google.gson.reflect.TypeToken;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements ItemHelper.OnCompleteListener, GalleryImageUploader.OnCompleteListener {
 
     ActivityMainBinding b;
     Bitmap bitmapFromString;
     List<Item> allItems = new ArrayList<>();
     Gson gson = new Gson();
+    private static final int SELECT_PICTURE = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -86,6 +91,7 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+
     /**
      * This method will show the add image option in our main activity.
      * @param menu
@@ -134,6 +140,7 @@ public class MainActivity extends AppCompatActivity {
                 });
     }
 
+    @SuppressLint("UseCompatLoadingForDrawables")
     private void inflateViewForItem(Item item) {
 
         //This is adding items in array list
@@ -142,26 +149,49 @@ public class MainActivity extends AppCompatActivity {
         //Inflate Layout
         ItemCardBinding binding = ItemCardBinding.inflate(getLayoutInflater());
 
-        //Retrieving Bitmap from its string.
-        /*try {
-            byte[] encodeByte = Base64.decode(item.imageRedirectedUrl, Base64.DEFAULT);
-            bitmapFromString = BitmapFactory.decodeByteArray(encodeByte, 0,
-                    encodeByte.length);
-            
-        } catch (Exception e) {
-            e.getMessage();
-        }*/
+
         //Bind Data
-        Glide.with(this)
-                .asBitmap()
-                .load(item.imageRedirectedUrl)
-                .into(binding.imageView);
+        if(item.imageRedirectedUrl != null){
+            Glide.with(this)
+                    .asBitmap()
+                    .load(item.imageRedirectedUrl)
+                    .into(binding.imageView);
+        }
+        else{
+            Glide.with(this)
+                    .asBitmap()
+                    .load(item.uri)
+                    .into(binding.imageView);
+        }
         //binding.imageView.setImageBitmap(bitmapFromString);
         binding.title.setText(item.label);
         binding.title.setBackgroundColor(item.color);
-
         //Add it to the list
         b.list.addView(binding.getRoot());
+    }
+
+    /**
+     * These 2 methods are the methods that will allow the user to upload the image from the gallery
+     * and it will call other methods to extract the color and label palette.
+     * @param requestCode
+     * @param resultCode
+     * @param data
+     */
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (resultCode == RESULT_OK) {
+            Uri galleryImageUri = data.getData();
+            new ItemHelper().fetchGalleryImage(galleryImageUri, MainActivity.this, this);
+        }
+    }
+
+    public void uploadImage(View v){
+        Toast.makeText(MainActivity.this, "Upload Image", Toast.LENGTH_SHORT).show();
+        Intent intent = new Intent();
+        intent.setType("image/*");
+        intent.setAction(Intent.ACTION_GET_CONTENT);
+        startActivityForResult(Intent.createChooser(intent, "Select Picture"), SELECT_PICTURE);
     }
 
     /**
@@ -186,5 +216,39 @@ public class MainActivity extends AppCompatActivity {
         preferences.edit()
                 .putString(Constants.ALL_ITEMS, json)
                 .apply();
+    }
+
+    /**
+     * All these below methods are the callbacks from the itemHelper and the galleryImageUploader
+     * classes.
+     * @param uri
+     * @param colors
+     * @param labels
+     */
+    @Override
+    public void onFetched(Uri uri, Set<Integer> colors, List<String> labels) {
+
+        new GalleryImageUploader().show(MainActivity.this, uri, colors, labels, this);
+
+    }
+
+    @Override
+    public void onFetched(String redirectedUrl, Set<Integer> colors, List<String> labels) {
+
+    }
+
+    @Override
+    public void setError(String error) {
+
+    }
+
+    @Override
+    public void onImageAdded(Item item) {
+        inflateViewForItem(item);
+    }
+
+    @Override
+    public void onError(String error) {
+
     }
 }

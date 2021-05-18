@@ -4,9 +4,9 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.res.ColorStateList;
 import android.graphics.Bitmap;
+import android.net.Uri;
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.util.Base64;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
@@ -16,7 +16,6 @@ import android.widget.Toast;
 import androidx.appcompat.app.AlertDialog;
 
 import com.bumptech.glide.Glide;
-import com.example.galleryapp.databinding.ActivityDemoBinding;
 import com.example.galleryapp.databinding.ChipColourBinding;
 import com.example.galleryapp.databinding.ChipLabelBinding;
 import com.example.galleryapp.databinding.DialogAddImageBinding;
@@ -24,7 +23,6 @@ import com.example.galleryapp.models.Item;
 import com.google.android.material.chip.Chip;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.List;
 import java.util.Set;
@@ -162,7 +160,7 @@ public class AddImageDialog implements ItemHelper.OnCompleteListener {
      * @param colors
      * @param labels
      */
-    private void showData(String redirectedUrl, Set<Integer> colors, List<String> labels) {
+     void showData(String redirectedUrl, Set<Integer> colors, List<String> labels) {
         //this.image = image;
         this.redirectedUrl = redirectedUrl;
         Glide.with(context)
@@ -229,11 +227,12 @@ public class AddImageDialog implements ItemHelper.OnCompleteListener {
                 byte[] b = baos.toByteArray();
                 String temp = Base64.encodeToString(b, Base64.DEFAULT);*/
 
-                listener.onImageAdded(new Item(redirectedUrl, color, label));
+                listener.onImageAdded(new Item(redirectedUrl,null, color, label));
                 dialog.dismiss();
             }
         });
     }
+
 
     /**
      * These methods to inflate the Chip groups
@@ -254,6 +253,11 @@ public class AddImageDialog implements ItemHelper.OnCompleteListener {
             binding.getRoot().setChipBackgroundColor(ColorStateList.valueOf(colour));
             b.colourPaletteChipGrp.addView(binding.getRoot());
         }
+    }
+
+    @Override
+    public void onFetched(Uri uri, Set<Integer> colors, List<String> labels) {
+
     }
 
     /**
