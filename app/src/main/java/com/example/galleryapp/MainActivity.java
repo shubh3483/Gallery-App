@@ -1,18 +1,12 @@
 package com.example.galleryapp;
 
-
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.util.Base64;
-import android.view.ContextMenu;
 import android.view.Menu;
-import android.view.MenuInflater;
 import android.view.MenuItem;
-import android.view.View;
-import android.widget.AdapterView;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
@@ -44,7 +38,6 @@ public class MainActivity extends AppCompatActivity {
         setContentView(b.getRoot());
         Gson gson = new Gson();
         if(savedInstanceState != null){
-            b.initialTV.setVisibility(View.GONE);
             String json = savedInstanceState.getString(Constants.ALL_ITEMS);
             allItems = gson.fromJson(json, new TypeToken<List<Item>>() {
             }.getType());
@@ -65,7 +58,6 @@ public class MainActivity extends AppCompatActivity {
             }
             else{
                 allItems = new ArrayList<>();
-                //b.initialTV.setVisibility(View.VISIBLE);
             }
         }else{
             SharedPreferences preferences = getPreferences(MODE_PRIVATE);
@@ -73,7 +65,6 @@ public class MainActivity extends AppCompatActivity {
             allItems = gson.fromJson(json, new TypeToken<List<Item>>() {
             }.getType());
             if(allItems != null){
-                b.initialTV.setVisibility(View.GONE);
                 for(Item item : allItems){
 
                     //Bind Data
@@ -93,7 +84,6 @@ public class MainActivity extends AppCompatActivity {
                 allItems = new ArrayList<>();
             }
         }
-        unregisterForContextMenu(b.list);
     }
 
     /**
@@ -152,6 +142,15 @@ public class MainActivity extends AppCompatActivity {
         //Inflate Layout
         ItemCardBinding binding = ItemCardBinding.inflate(getLayoutInflater());
 
+        //Retrieving Bitmap from its string.
+        /*try {
+            byte[] encodeByte = Base64.decode(item.imageRedirectedUrl, Base64.DEFAULT);
+            bitmapFromString = BitmapFactory.decodeByteArray(encodeByte, 0,
+                    encodeByte.length);
+            
+        } catch (Exception e) {
+            e.getMessage();
+        }*/
         //Bind Data
         Glide.with(this)
                 .asBitmap()
@@ -161,13 +160,9 @@ public class MainActivity extends AppCompatActivity {
         binding.title.setText(item.label);
         binding.title.setBackgroundColor(item.color);
 
-
-        b.initialTV.setVisibility(View.GONE);
-
         //Add it to the list
         b.list.addView(binding.getRoot());
     }
-
 
     /**
      * This method will save the item card so that when the screen is rotated the data is not lost.

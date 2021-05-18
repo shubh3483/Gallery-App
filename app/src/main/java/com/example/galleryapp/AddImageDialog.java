@@ -81,7 +81,7 @@ public class AddImageDialog implements ItemHelper.OnCompleteListener {
     }
 
     /**
-     * This function will handle input dimensions.
+     * This function will handle input dimesnions.
      */
     private void handleDimensionsInput() {
 
@@ -156,9 +156,9 @@ public class AddImageDialog implements ItemHelper.OnCompleteListener {
     }
 
     /**
-     * After we got the redirectedUrl, colors and labels by taking it from the callback we will show the
-     * final image, color chips and label chips and ask the user to choose from them.
-     * @param redirectedUrl
+     * After we got the image, colors and labels by taking it from the callback we will show the
+     * final image color chips and label chips and ask the user to choose from them.
+     *
      * @param colors
      * @param labels
      */
@@ -198,8 +198,8 @@ public class AddImageDialog implements ItemHelper.OnCompleteListener {
     }
 
     /**
-     * At last it will get the final redirectedUrl, color and label and it will send a callback in the
-     * MainActivity to send the final redirectedUrl, color and label.
+     * At last it will get the final image, color and label and it will send a callback in the
+     * MainActivity to send the final image, color and label.
      */
     private void handleAddImageEvent() {
         b.addBtn.setOnClickListener(new View.OnClickListener() {
@@ -224,6 +224,11 @@ public class AddImageDialog implements ItemHelper.OnCompleteListener {
                     label = ((Chip)b.labelChipGrp.findViewById(labelChipId)).getText().toString();
                 }
                 int color = ((Chip)b.colourPaletteChipGrp.findViewById(colorChipId)).getChipBackgroundColor().getDefaultColor();
+                /*ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                image.compress(Bitmap.CompressFormat.PNG, 100, baos);
+                byte[] b = baos.toByteArray();
+                String temp = Base64.encodeToString(b, Base64.DEFAULT);*/
+
                 listener.onImageAdded(new Item(redirectedUrl, color, label));
                 dialog.dismiss();
             }
@@ -253,7 +258,7 @@ public class AddImageDialog implements ItemHelper.OnCompleteListener {
 
     /**
      * The below two methods are listener of ItemHelper class.
-     * @param redirectedUrl
+     *
      * @param colors
      * @param labels
      */

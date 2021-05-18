@@ -2,19 +2,17 @@ package com.example.galleryapp;
 
 import android.os.AsyncTask;
 
-import com.google.android.gms.tasks.OnCompleteListener;
-
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 
-public class RedirectedUrl extends AsyncTask<String, Void, String> {
+public class RedirectedUrlHelper extends AsyncTask<String, Void, String> {
 
 
     OnCompleteListener listener;
 
-    public RedirectedUrl getRedirectedUrl(OnCompleteListener listener){
+    public RedirectedUrlHelper getRedirectedUrl(OnCompleteListener listener){
         this.listener = listener;
         return this;
     }
