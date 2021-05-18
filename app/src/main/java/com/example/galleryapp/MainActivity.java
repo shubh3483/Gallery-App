@@ -4,10 +4,8 @@ import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
-import android.util.Base64;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -35,7 +33,7 @@ public class MainActivity extends AppCompatActivity implements ItemHelper.OnComp
     Bitmap bitmapFromString;
     List<Item> allItems = new ArrayList<>();
     Gson gson = new Gson();
-    private final int SELECT_PICTURE = 1;
+    private static final int SELECT_PICTURE = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -45,23 +43,23 @@ public class MainActivity extends AppCompatActivity implements ItemHelper.OnComp
         setContentView(b.getRoot());
         Gson gson = new Gson();
         if(savedInstanceState != null){
-            String json = savedInstanceState.getString(Constants.ALL_ITEMS);
+            String json = savedInstanceState.getString(Constants.ALL_ITEMS, null);
             allItems = gson.fromJson(json, new TypeToken<List<Item>>() {
             }.getType());
             if(allItems != null){
                 for(Item item : allItems){
                     //Bind Data
                     ItemCardBinding binding = ItemCardBinding.inflate(getLayoutInflater());
-
                     if(item.imageRedirectedUrl != null){
                         Glide.with(this)
                                 .asBitmap()
                                 .load(item.imageRedirectedUrl)
                                 .into(binding.imageView);
-                    }else if(item.uri != null){
+                    }
+                    else{
                         Glide.with(this)
                                 .asBitmap()
-                                .load(item.uri)
+                                .load(Uri.parse(item.uri))
                                 .into(binding.imageView);
                     }
                     //binding.imageView.setImageBitmap(bitmapFromString);
@@ -86,11 +84,14 @@ public class MainActivity extends AppCompatActivity implements ItemHelper.OnComp
                     ItemCardBinding binding = ItemCardBinding.inflate(getLayoutInflater());
                     if(item.imageRedirectedUrl != null){
                         Glide.with(this)
+                                .asBitmap()
                                 .load(item.imageRedirectedUrl)
                                 .into(binding.imageView);
-                    }else if(item.uri != null){
+                    }
+                    else{
                         Glide.with(this)
-                                .load(item.uri)
+                                .asBitmap()
+                                .load(Uri.parse(item.uri))
                                 .into(binding.imageView);
                     }
                     //binding.imageView.setImageBitmap(bitmapFromString);
@@ -105,6 +106,7 @@ public class MainActivity extends AppCompatActivity implements ItemHelper.OnComp
             }
         }
     }
+
 
     /**
      * This method will show the add image option in our main activity.
@@ -154,6 +156,36 @@ public class MainActivity extends AppCompatActivity implements ItemHelper.OnComp
                 });
     }
 
+    @SuppressLint("UseCompatLoadingForDrawables")
+    private void inflateViewForItem(Item item) {
+
+        //This is adding items in array list
+        allItems.add(item);
+
+        //Inflate Layout
+        ItemCardBinding binding = ItemCardBinding.inflate(getLayoutInflater());
+
+
+        //Bind Data
+        if(item.imageRedirectedUrl != null){
+            Glide.with(this)
+                    .asBitmap()
+                    .load(item.imageRedirectedUrl)
+                    .into(binding.imageView);
+        }
+        else{
+            Glide.with(this)
+                    .asBitmap()
+                    .load(Uri.parse(item.uri))
+                    .into(binding.imageView);
+        }
+        //binding.imageView.setImageBitmap(bitmapFromString);
+        binding.title.setText(item.label);
+        binding.title.setBackgroundColor(item.color);
+        //Add it to the list
+        b.list.addView(binding.getRoot());
+    }
+
     /**
      * These 2 methods are the methods that will allow the user to upload the image from the gallery
      * and it will call other methods to extract the color and label palette.
@@ -176,36 +208,6 @@ public class MainActivity extends AppCompatActivity implements ItemHelper.OnComp
         intent.setType("image/*");
         intent.setAction(Intent.ACTION_GET_CONTENT);
         startActivityForResult(Intent.createChooser(intent, "Select Picture"), SELECT_PICTURE);
-    }
-
-    @SuppressLint("UseCompatLoadingForDrawables")
-    private void inflateViewForItem(Item item) {
-
-        //This is adding items in array list
-        allItems.add(item);
-
-        //Inflate Layout
-        ItemCardBinding binding = ItemCardBinding.inflate(getLayoutInflater());
-
-
-        //Bind Data
-        if(item.imageRedirectedUrl != null){
-            Glide.with(this)
-                    .asBitmap()
-                    .load(item.imageRedirectedUrl)
-                    .into(binding.imageView);
-        }
-        else{
-            Glide.with(this)
-                    .asBitmap()
-                    .load(item.uri)
-                    .into(binding.imageView);
-        }
-        //binding.imageView.setImageBitmap(bitmapFromString);
-        binding.title.setText(item.label);
-        binding.title.setBackgroundColor(item.color);
-        //Add it to the list
-        b.list.addView(binding.getRoot());
     }
 
     /**
@@ -232,19 +234,18 @@ public class MainActivity extends AppCompatActivity implements ItemHelper.OnComp
                 .apply();
     }
 
-    @Override
-    public void onImageAdded(Item item) {
-        inflateViewForItem(item);
-    }
-
-    @Override
-    public void onError(String error) {
-
-    }
-
+    /**
+     * All these below methods are the callbacks from the itemHelper and the galleryImageUploader
+     * classes.
+     * @param uri
+     * @param colors
+     * @param labels
+     */
     @Override
     public void onFetched(Uri uri, Set<Integer> colors, List<String> labels) {
+
         new GalleryImageUploader().show(MainActivity.this, uri, colors, labels, this);
+
     }
 
     @Override
@@ -254,6 +255,16 @@ public class MainActivity extends AppCompatActivity implements ItemHelper.OnComp
 
     @Override
     public void setError(String error) {
+
+    }
+
+    @Override
+    public void onImageAdded(Item item) {
+        inflateViewForItem(item);
+    }
+
+    @Override
+    public void onError(String error) {
 
     }
 }

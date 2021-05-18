@@ -130,7 +130,7 @@ public class GalleryImageUploader {
                     label = ((Chip)b.labelChipGrp.findViewById(labelChipId)).getText().toString();
                 }
                 int color = ((Chip)b.colourPaletteChipGrp.findViewById(colorChipId)).getChipBackgroundColor().getDefaultColor();
-                listener.onImageAdded(new Item(null, uri, color, label));
+                listener.onImageAdded(new Item(null, uri.toString(), color, label));
                 dialog.dismiss();
             }
         });
