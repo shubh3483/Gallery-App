@@ -1,5 +1,6 @@
 package com.example.galleryapp;
 
+
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -151,15 +152,6 @@ public class MainActivity extends AppCompatActivity {
         //Inflate Layout
         ItemCardBinding binding = ItemCardBinding.inflate(getLayoutInflater());
 
-        //Retrieving Bitmap from its string.
-        /*try {
-            byte[] encodeByte = Base64.decode(item.imageRedirectedUrl, Base64.DEFAULT);
-            bitmapFromString = BitmapFactory.decodeByteArray(encodeByte, 0,
-                    encodeByte.length);
-            
-        } catch (Exception e) {
-            e.getMessage();
-        }*/
         //Bind Data
         Glide.with(this)
                 .asBitmap()
@@ -176,26 +168,6 @@ public class MainActivity extends AppCompatActivity {
         b.list.addView(binding.getRoot());
     }
 
-
-    /*@Override
-    public void onCreateContextMenu(ContextMenu menu, View v,
-                                    ContextMenu.ContextMenuInfo menuInfo) {
-        super.onCreateContextMenu(menu, v, menuInfo);
-        MenuInflater inflater = getMenuInflater();
-        inflater.inflate(R.menu.gallery_app, menu);
-    }
-
-    @Override
-    public boolean onContextItemSelected(@NonNull MenuItem item) {
-        AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo) item.getMenuInfo();
-        switch (item.getItemId()){
-            case R.id.editCard : Toast.makeText(getApplicationContext(), "editing", Toast.LENGTH_SHORT).show();
-                return true;
-            case R.id.deleteCard : Toast.makeText(getApplicationContext(), "Deleting", Toast.LENGTH_SHORT).show();
-                return true;
-        }
-            return super.onContextItemSelected(item);
-    }*/
 
     /**
      * This method will save the item card so that when the screen is rotated the data is not lost.
