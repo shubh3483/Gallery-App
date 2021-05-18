@@ -102,11 +102,6 @@ public class GalleryImageUploader {
         });
     }
 
-    /**
-     * At last it will get the final image, color and label and it will send a callback in the
-     * MainActivity to send the final image, color and label.
-     */
-
 
     /**
      * This method will handle the functionality when the user presses Add btn
