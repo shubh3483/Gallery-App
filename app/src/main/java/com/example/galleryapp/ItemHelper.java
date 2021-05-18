@@ -9,13 +9,10 @@ import androidx.annotation.Nullable;
 import androidx.palette.graphics.Palette;
 
 import com.bumptech.glide.Glide;
-import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.request.target.CustomTarget;
 import com.bumptech.glide.request.transition.Transition;
-import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.mlkit.vision.common.InputImage;
 import com.google.mlkit.vision.label.ImageLabel;
 import com.google.mlkit.vision.label.ImageLabeler;
@@ -23,16 +20,13 @@ import com.google.mlkit.vision.label.ImageLabeling;
 import com.google.mlkit.vision.label.defaults.ImageLabelerOptions;
 
 import java.io.IOException;
-import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
 import java.net.URL;
-import java.net.URLConnection;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-public class ItemHelper {
+public class ItemHelper /*extends AsyncTask<Void, Void, Void>*/{
 
     private Context context;
     private OnCompleteListener listener;
@@ -40,7 +34,8 @@ public class ItemHelper {
     String squareImageURL = "https://picsum.photos/%d";
     private Bitmap bitmap;
     private Set<Integer> colors;
-    private String finalRedirectedUrl = "";
+    String globalFinalUrl = "";
+
 
 
     /**
@@ -60,7 +55,6 @@ public class ItemHelper {
 
     void fetchData(int x, Context context, OnCompleteListener listener) throws IOException {
         this.context = context;
-
         this.listener = listener;
         fetchImage(String.format(squareImageURL, x));
     }
@@ -68,29 +62,36 @@ public class ItemHelper {
     /**
      * This method will fetch image according to the URL passed into it.
      * @param url
-     * @throws IOException
      */
-    void fetchImage(String url) throws IOException {
-        Glide.with(context)
-                .asBitmap()
-                .skipMemoryCache(true)
-                .diskCacheStrategy(DiskCacheStrategy.NONE)
-                .load(url)
-                .into(new CustomTarget<Bitmap>() {
-                    @Override
-                    public void onResourceReady(@NonNull Bitmap resource, @Nullable Transition<? super Bitmap> transition) {
-                        bitmap = resource;
-                        extractPaletteFromBitmap();
-                    }
+    void fetchImage(String url) {
 
-                    @Override
-                    public void onLoadCleared(@Nullable Drawable placeholder) {
+        new RedirectedUrl().getRedirectedUrl(new RedirectedUrl.OnCompleteListener() {
+            @Override
+            public void onFetched(String fetchedUrl) {
+                globalFinalUrl = fetchedUrl;
+                Glide.with(context)
+                        .asBitmap()
+                        .load(globalFinalUrl)
+                        .into(new CustomTarget<Bitmap>() {
+                            @Override
+                            public void onResourceReady(@NonNull Bitmap resource, @Nullable Transition<? super Bitmap> transition) {
+                                bitmap = resource;
+                                extractPaletteFromBitmap();
+                            }
 
-                    }
-                });
+                            @Override
+                            public void onLoadCleared(@Nullable Drawable placeholder) {
+
+                            }
+                        });
+            }
+        }).execute(url);
     }
 
 
+    /**
+     * This method will extract the color palette from the bitmap.
+     */
     private void extractPaletteFromBitmap() {
         Palette.from(bitmap).generate(new Palette.PaletteAsyncListener() {
             public void onGenerated(Palette p) {
@@ -114,7 +115,7 @@ public class ItemHelper {
                         for(ImageLabel label : labels){
                             strings.add(label.getText());
                         }
-                        listener.onFetched(bitmap,colors,strings);
+                        listener.onFetched(globalFinalUrl,colors,strings);
                     }
                 })
                 .addOnFailureListener(new OnFailureListener() {
@@ -149,8 +150,10 @@ public class ItemHelper {
         return colors;
     }
 
+
+
     interface OnCompleteListener{
-        void onFetched(Bitmap bitmap, Set<Integer> colors, List<String> labels);
+        void onFetched(String redirectedUrl, Set<Integer> colors, List<String> labels);
         void setError(String error);
     }
 }

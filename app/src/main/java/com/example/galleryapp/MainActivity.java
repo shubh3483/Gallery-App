@@ -4,7 +4,6 @@ import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Bundle;
-import android.os.PersistableBundle;
 import android.util.Base64;
 import android.view.ContextMenu;
 import android.view.Menu;
@@ -18,6 +17,7 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 
+import com.bumptech.glide.Glide;
 import com.example.galleryapp.databinding.ActivityMainBinding;
 import com.example.galleryapp.databinding.ItemCardBinding;
 import com.example.galleryapp.models.Item;
@@ -49,17 +49,13 @@ public class MainActivity extends AppCompatActivity {
             }.getType());
             if(allItems != null){
                 for(Item item : allItems){
-                    try {
-                        byte[] encodeByte = Base64.decode(item.bitmapAsString, Base64.DEFAULT);
-                        bitmapFromString = BitmapFactory.decodeByteArray(encodeByte, 0,
-                                encodeByte.length);
-
-                    } catch (Exception e) {
-                        e.getMessage();
-                    }
                     //Bind Data
                     ItemCardBinding binding = ItemCardBinding.inflate(getLayoutInflater());
-                    binding.imageView.setImageBitmap(bitmapFromString);
+                    Glide.with(this)
+                            .asBitmap()
+                            .load(item.imageRedirectedUrl)
+                            .into(binding.imageView);
+                    //binding.imageView.setImageBitmap(bitmapFromString);
                     binding.title.setText(item.label);
                     binding.title.setBackgroundColor(item.color);
 
@@ -78,17 +74,14 @@ public class MainActivity extends AppCompatActivity {
             if(allItems != null){
                 b.initialTV.setVisibility(View.GONE);
                 for(Item item : allItems){
-                    try {
-                        byte[] encodeByte = Base64.decode(item.bitmapAsString, Base64.DEFAULT);
-                        bitmapFromString = BitmapFactory.decodeByteArray(encodeByte, 0,
-                                encodeByte.length);
 
-                    } catch (Exception e) {
-                        e.getMessage();
-                    }
                     //Bind Data
                     ItemCardBinding binding = ItemCardBinding.inflate(getLayoutInflater());
-                    binding.imageView.setImageBitmap(bitmapFromString);
+                    Glide.with(this)
+                            .asBitmap()
+                            .load(item.imageRedirectedUrl)
+                            .into(binding.imageView);
+                    //binding.imageView.setImageBitmap(bitmapFromString);
                     binding.title.setText(item.label);
                     binding.title.setBackgroundColor(item.color);
 
@@ -159,16 +152,20 @@ public class MainActivity extends AppCompatActivity {
         ItemCardBinding binding = ItemCardBinding.inflate(getLayoutInflater());
 
         //Retrieving Bitmap from its string.
-        try {
-            byte[] encodeByte = Base64.decode(item.bitmapAsString, Base64.DEFAULT);
+        /*try {
+            byte[] encodeByte = Base64.decode(item.imageRedirectedUrl, Base64.DEFAULT);
             bitmapFromString = BitmapFactory.decodeByteArray(encodeByte, 0,
                     encodeByte.length);
             
         } catch (Exception e) {
             e.getMessage();
-        }
+        }*/
         //Bind Data
-        binding.imageView.setImageBitmap(bitmapFromString);
+        Glide.with(this)
+                .asBitmap()
+                .load(item.imageRedirectedUrl)
+                .into(binding.imageView);
+        //binding.imageView.setImageBitmap(bitmapFromString);
         binding.title.setText(item.label);
         binding.title.setBackgroundColor(item.color);
 

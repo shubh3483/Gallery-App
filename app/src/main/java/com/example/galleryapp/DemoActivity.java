@@ -1,3 +1,4 @@
+/*
 package com.example.galleryapp;
 
 import android.content.res.ColorStateList;
@@ -64,7 +65,8 @@ public class DemoActivity extends AppCompatActivity {
 
 
 
-    /*private void testDialog() {
+    */
+/*private void testDialog() {
 
         DialogAddImageBinding binding = DialogAddImageBinding.inflate(getLayoutInflater());
         AlertDialog dialog = new MaterialAlertDialogBuilder(this,R.style.CustomDialogTheme)
@@ -94,5 +96,6 @@ public class DemoActivity extends AppCompatActivity {
             }
         });
 
-    }*/
-}
+    }*//*
+
+}*/
