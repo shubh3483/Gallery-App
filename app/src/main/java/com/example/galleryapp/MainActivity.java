@@ -1,5 +1,6 @@
 package com.example.galleryapp;
 
+import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
@@ -177,6 +178,7 @@ public class MainActivity extends AppCompatActivity implements ItemHelper.OnComp
         startActivityForResult(Intent.createChooser(intent, "Select Picture"), SELECT_PICTURE);
     }
 
+    @SuppressLint("UseCompatLoadingForDrawables")
     private void inflateViewForItem(Item item) {
 
         //This is adding items in array list
@@ -192,16 +194,16 @@ public class MainActivity extends AppCompatActivity implements ItemHelper.OnComp
                     .asBitmap()
                     .load(item.imageRedirectedUrl)
                     .into(binding.imageView);
-        }else{
+        }
+        else{
             Glide.with(this)
                     .asBitmap()
                     .load(item.uri)
                     .into(binding.imageView);
         }
-
+        //binding.imageView.setImageBitmap(bitmapFromString);
         binding.title.setText(item.label);
         binding.title.setBackgroundColor(item.color);
-
         //Add it to the list
         b.list.addView(binding.getRoot());
     }
