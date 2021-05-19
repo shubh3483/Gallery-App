@@ -1,10 +1,13 @@
 package com.example.galleryapp;
 
+import android.Manifest;
 import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -13,6 +16,7 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
 
 
 import com.bumptech.glide.Glide;
@@ -29,6 +33,7 @@ import java.util.Set;
 
 public class MainActivity extends AppCompatActivity implements ItemHelper.OnCompleteListener, GalleryImageUploader.OnCompleteListener {
 
+    private static final int REQUEST_PERMISSION = 0;
     ActivityMainBinding b;
     Bitmap bitmapFromString;
     List<Item> allItems = new ArrayList<>();
@@ -43,6 +48,7 @@ public class MainActivity extends AppCompatActivity implements ItemHelper.OnComp
         setContentView(b.getRoot());
         Gson gson = new Gson();
         if(savedInstanceState != null){
+            b.noItemsTV.setVisibility(View.GONE);
             String json = savedInstanceState.getString(Constants.ALL_ITEMS, null);
             allItems = gson.fromJson(json, new TypeToken<List<Item>>() {
             }.getType());
@@ -73,6 +79,7 @@ public class MainActivity extends AppCompatActivity implements ItemHelper.OnComp
                 allItems = new ArrayList<>();
             }
         }else{
+            b.noItemsTV.setVisibility(View.GONE);
             SharedPreferences preferences = getPreferences(MODE_PRIVATE);
             String json = preferences.getString(Constants.ALL_ITEMS, null);
             allItems = gson.fromJson(json, new TypeToken<List<Item>>() {
@@ -103,6 +110,37 @@ public class MainActivity extends AppCompatActivity implements ItemHelper.OnComp
             }
             else{
                 allItems = new ArrayList<>();
+            }
+        }
+
+        /**
+         * This below code is for granting permission so that we do not encounter permission denied
+         * exception while running the app.
+         */
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+
+            int hasWritePermission = checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE);
+            int hasReadPermission = checkSelfPermission(Manifest.permission.READ_EXTERNAL_STORAGE);
+
+            List<String> permissions = new ArrayList<String>();
+            if (hasWritePermission != PackageManager.PERMISSION_GRANTED) {
+                permissions.add(Manifest.permission.WRITE_EXTERNAL_STORAGE);
+            } else {
+//              preferencesUtility.setString("storage", "true");
+            }
+
+            if (hasReadPermission != PackageManager.PERMISSION_GRANTED) {
+                permissions.add(Manifest.permission.READ_EXTERNAL_STORAGE);
+
+            } else {
+//              preferencesUtility.setString("storage", "true");
+            }
+
+            if (!permissions.isEmpty()) {
+//              requestPermissions(permissions.toArray(new String[permissions.size()]), REQUEST_CODE_SOME_FEATURES_PERMISSIONS);
+
+                ActivityCompat.requestPermissions(this, new String[] {Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.READ_PHONE_STATE},
+                        REQUEST_PERMISSION);
             }
         }
     }
@@ -182,6 +220,9 @@ public class MainActivity extends AppCompatActivity implements ItemHelper.OnComp
         //binding.imageView.setImageBitmap(bitmapFromString);
         binding.title.setText(item.label);
         binding.title.setBackgroundColor(item.color);
+
+        //Hiding the No Items text view from the main activity if the item is added.
+        b.noItemsTV.setVisibility(View.GONE);
         //Add it to the list
         b.list.addView(binding.getRoot());
     }

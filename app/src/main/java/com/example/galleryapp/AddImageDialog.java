@@ -1,29 +1,44 @@
 package com.example.galleryapp;
 
 import android.app.Activity;
+import android.content.ContentValues;
 import android.content.Context;
+import android.content.Intent;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
 import android.content.res.ColorStateList;
 import android.graphics.Bitmap;
+import android.graphics.drawable.Drawable;
 import android.net.Uri;
+import android.provider.MediaStore;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.CompoundButton;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.request.target.CustomTarget;
+import com.bumptech.glide.request.target.Target;
+import com.bumptech.glide.request.transition.Transition;
 import com.example.galleryapp.databinding.ChipColourBinding;
 import com.example.galleryapp.databinding.ChipLabelBinding;
 import com.example.galleryapp.databinding.DialogAddImageBinding;
 import com.example.galleryapp.models.Item;
 import com.google.android.material.chip.Chip;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
+import com.squareup.picasso.Picasso;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.util.List;
 import java.util.Set;
 
@@ -167,7 +182,6 @@ public class AddImageDialog implements ItemHelper.OnCompleteListener {
                 .asBitmap()
                 .load(redirectedUrl)
                 .into(b.imageView);
-        //b.imageView.setImageBitmap(image);
         inflateColourChips(colors);
         inflateLabelChips(labels);
         b.progressIndicatorRoot.setVisibility(View.GONE);
@@ -175,7 +189,81 @@ public class AddImageDialog implements ItemHelper.OnCompleteListener {
         b.customInput.setVisibility(View.GONE);
         handleCustomInputLayout();
         handleAddImageEvent();
+        handleShareImageEvent();
     }
+
+
+    /**
+     * This function will share the generated image with another apps.
+     */
+    private void handleShareImageEvent() {
+
+        b.shareImgBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                try{
+                    Glide.with(context)
+                            .asBitmap()
+                            .load(redirectedUrl)
+                            .into(new CustomTarget<Bitmap>() {
+                                @Override
+                                public void onResourceReady(@NonNull Bitmap resource, @Nullable Transition<? super Bitmap> transition) {
+                                    // Calling the intent to share the bitmap
+                                    Bitmap icon = resource;
+                                    Intent share = new Intent(Intent.ACTION_SEND);
+                                    share.setType("image/jpeg");
+
+                                    ContentValues values = new ContentValues();
+                                    values.put(MediaStore.Images.Media.TITLE, "title");
+                                    values.put(MediaStore.Images.Media.MIME_TYPE, "image/jpeg");
+                                    Uri uri = context.getContentResolver().insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
+                                            values);
+
+
+                                    OutputStream outputStream;
+                                    try {
+                                        outputStream = context.getContentResolver().openOutputStream(uri);
+                                        icon.compress(Bitmap.CompressFormat.JPEG, 100, outputStream);
+                                        outputStream.close();
+                                    } catch (Exception e) {
+                                        System.err.println(e.toString());
+                                    }
+
+                                    share.putExtra(Intent.EXTRA_STREAM, uri);
+                                    context.startActivity(Intent.createChooser(share, "Share Image"));
+                                }
+
+                                @Override
+                                public void onLoadCleared(@Nullable Drawable placeholder) {
+
+                                }
+                            });
+                    /*Intent sharingIntent = new Intent(android.content.Intent.ACTION_SEND);
+                    //String path = MediaStore.Images.Media.insertImage(context.getContentResolver(), image, "", null);
+                    Uri uri =  Uri.parse( redirectedUrl );
+                    //sharingIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_WHEN_TASK_RESET);
+                    sharingIntent.setType("image/jpeg");
+                    sharingIntent.setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+
+                    sharingIntent.putExtra(Intent.EXTRA_STREAM, uri);
+
+                    context.startActivity(Intent.createChooser(sharingIntent,"Share via"));*/
+
+                    /*Intent shareIntent =   new Intent(android.content.Intent.ACTION_SEND);
+                    shareIntent.setType("text/plain");
+                    shareIntent.putExtra(Intent.EXTRA_SUBJECT,"Insert Subject here");
+                    String app_url = redirectedUrl;
+                    shareIntent.putExtra(android.content.Intent.EXTRA_TEXT,app_url);
+                    context.startActivity(Intent.createChooser(shareIntent, "Share via"));*/
+                } catch (Exception e) {
+                    Log.e("Error on sharing", e + " ");
+                    Toast.makeText(context, "App not Installed", Toast.LENGTH_SHORT).show();
+                }
+            }
+        });
+    }
+
+
 
     /**
      * This method will check whether the user has opted for custom input or not.
