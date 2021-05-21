@@ -35,7 +35,6 @@ public class MainActivity extends AppCompatActivity implements ItemHelper.OnComp
 
     private static final int REQUEST_PERMISSION = 0;
     ActivityMainBinding b;
-    Bitmap bitmapFromString;
     List<Item> allItems = new ArrayList<>();
     Gson gson = new Gson();
     private static final int SELECT_PICTURE = 0;
@@ -46,77 +45,19 @@ public class MainActivity extends AppCompatActivity implements ItemHelper.OnComp
         b = ActivityMainBinding.inflate(getLayoutInflater());
         setTitle("Gallery");
         setContentView(b.getRoot());
-        Gson gson = new Gson();
         if(savedInstanceState != null){
-            b.noItemsTV.setVisibility(View.GONE);
-            String json = savedInstanceState.getString(Constants.ALL_ITEMS, null);
-            allItems = gson.fromJson(json, new TypeToken<List<Item>>() {
-            }.getType());
-            if(allItems != null){
-                for(Item item : allItems){
-                    //Bind Data
-                    ItemCardBinding binding = ItemCardBinding.inflate(getLayoutInflater());
-                    if(item.imageRedirectedUrl != null){
-                        Glide.with(this)
-                                .asBitmap()
-                                .load(item.imageRedirectedUrl)
-                                .into(binding.imageView);
-                    }
-                    else{
-                        Glide.with(this)
-                                .asBitmap()
-                                .load(Uri.parse(item.uri))
-                                .into(binding.imageView);
-                    }
-                    //binding.imageView.setImageBitmap(bitmapFromString);
-                    binding.title.setText(item.label);
-                    binding.title.setBackgroundColor(item.color);
-
-                    b.list.addView(binding.getRoot());
-                }
-            }
-            else{
-                allItems = new ArrayList<>();
-            }
+            savedInstance(savedInstanceState);
         }else{
-            b.noItemsTV.setVisibility(View.GONE);
-            SharedPreferences preferences = getPreferences(MODE_PRIVATE);
-            String json = preferences.getString(Constants.ALL_ITEMS, null);
-            allItems = gson.fromJson(json, new TypeToken<List<Item>>() {
-            }.getType());
-            if(allItems != null){
-                for(Item item : allItems){
-
-                    //Bind Data
-                    ItemCardBinding binding = ItemCardBinding.inflate(getLayoutInflater());
-                    if(item.imageRedirectedUrl != null){
-                        Glide.with(this)
-                                .asBitmap()
-                                .load(item.imageRedirectedUrl)
-                                .into(binding.imageView);
-                    }
-                    else{
-                        Glide.with(this)
-                                .asBitmap()
-                                .load(Uri.parse(item.uri))
-                                .into(binding.imageView);
-                    }
-                    //binding.imageView.setImageBitmap(bitmapFromString);
-                    binding.title.setText(item.label);
-                    binding.title.setBackgroundColor(item.color);
-
-                    b.list.addView(binding.getRoot());
-                }
-            }
-            else{
-                allItems = new ArrayList<>();
-            }
+            sharedPreferences();
         }
+        permissionAccess();
+    }
 
-        /**
-         * This below code is for granting permission so that we do not encounter permission denied
-         * exception while running the app.
-         */
+    /**
+     * This below code is for granting permission so that we do not encounter permission denied
+     * exception while running the app.
+     */
+    private void permissionAccess() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
 
             int hasWritePermission = checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE);
@@ -142,6 +83,82 @@ public class MainActivity extends AppCompatActivity implements ItemHelper.OnComp
                 ActivityCompat.requestPermissions(this, new String[] {Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.READ_PHONE_STATE},
                         REQUEST_PERMISSION);
             }
+        }
+    }
+
+    /**
+     * This method will prevent loss of data when the app is completely stopped.
+     */
+    private void sharedPreferences() {
+        b.noItemsTV.setVisibility(View.GONE);
+        SharedPreferences preferences = getPreferences(MODE_PRIVATE);
+        String json = preferences.getString(Constants.ALL_ITEMS, null);
+        allItems = gson.fromJson(json, new TypeToken<List<Item>>() {
+        }.getType());
+        if(allItems != null){
+            for(Item item : allItems){
+
+                //Bind Data
+                ItemCardBinding binding = ItemCardBinding.inflate(getLayoutInflater());
+                if(item.imageRedirectedUrl != null){
+                    Glide.with(this)
+                            .asBitmap()
+                            .load(item.imageRedirectedUrl)
+                            .into(binding.imageView);
+                }
+                else{
+                    Glide.with(this)
+                            .asBitmap()
+                            .load(Uri.parse(item.uri))
+                            .into(binding.imageView);
+                }
+                //binding.imageView.setImageBitmap(bitmapFromString);
+                binding.title.setText(item.label);
+                binding.title.setBackgroundColor(item.color);
+
+                b.list.addView(binding.getRoot());
+            }
+        }
+        else{
+            allItems = new ArrayList<>();
+        }
+    }
+
+    /**
+     * This method contains the saved instance data and it will prevent loss of data when the screen
+     *  is rotated.
+     * @param savedInstanceState
+     */
+    private void savedInstance(Bundle savedInstanceState) {
+        b.noItemsTV.setVisibility(View.GONE);
+        String json = savedInstanceState.getString(Constants.ALL_ITEMS, null);
+        allItems = gson.fromJson(json, new TypeToken<List<Item>>() {
+        }.getType());
+        if(allItems != null){
+            for(Item item : allItems){
+                //Bind Data
+                ItemCardBinding binding = ItemCardBinding.inflate(getLayoutInflater());
+                if(item.imageRedirectedUrl != null){
+                    Glide.with(this)
+                            .asBitmap()
+                            .load(item.imageRedirectedUrl)
+                            .into(binding.imageView);
+                }
+                else{
+                    Glide.with(this)
+                            .asBitmap()
+                            .load(Uri.parse(item.uri))
+                            .into(binding.imageView);
+                }
+                //binding.imageView.setImageBitmap(bitmapFromString);
+                binding.title.setText(item.label);
+                binding.title.setBackgroundColor(item.color);
+
+                b.list.addView(binding.getRoot());
+            }
+        }
+        else{
+            allItems = new ArrayList<>();
         }
     }
 

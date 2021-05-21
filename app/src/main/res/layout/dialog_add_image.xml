@@ -224,8 +224,8 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:hint="Label"
-            android:visibility="visible"
-            android:imeOptions="actionDone"/>
+            android:imeOptions="actionDone"
+            android:visibility="visible" />
     </com.google.android.material.textfield.TextInputLayout>
 
     <com.google.android.material.button.MaterialButton
@@ -244,7 +244,7 @@
         android:layout_height="wrap_content"
         android:visibility="gone"
         app:constraint_referenced_ids="imageView,choosePaletteTitle,colourPaletteChipGrp,chooseLabelTitle,labelChipGrp,addBtn,shareImgBtn"
-        tools:visibility="gone" />
+        tools:visibility="visible" />
 
     <Button
         android:id="@+id/shareImgBtn"
@@ -254,7 +254,7 @@
         android:layout_marginEnd="12dp"
         android:text="Share Image"
         app:layout_constraintEnd_toStartOf="@+id/addBtn"
-        app:layout_constraintTop_toBottomOf="@+id/labelChipGrp" />
+        app:layout_constraintTop_toBottomOf="@+id/customInput" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
 </ScrollView>

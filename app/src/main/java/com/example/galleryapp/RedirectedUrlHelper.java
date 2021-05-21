@@ -2,10 +2,16 @@ package com.example.galleryapp;
 
 import android.os.AsyncTask;
 
+import org.jsoup.Connection.Response;
+
+import org.jsoup.Jsoup;
+
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
+
+
 
 public class RedirectedUrlHelper extends AsyncTask<String, Void, String> {
 
@@ -22,7 +28,7 @@ public class RedirectedUrlHelper extends AsyncTask<String, Void, String> {
 
         String secondURL = "";
         try {
-            URL urlTmp = null;
+            /*URL urlTmp = null;
             HttpURLConnection connection = null;
 
             try {
@@ -43,8 +49,12 @@ public class RedirectedUrlHelper extends AsyncTask<String, Void, String> {
             }
 
             secondURL = connection.getURL().toString();
-            connection.disconnect();
+            connection.disconnect();*/
 
+            //This one line will give us the redirected URL.
+            Response response = Jsoup.connect(url[0]).ignoreContentType(true).execute();
+            //System.out.println(response.statusCode() + " : " + response.url().toString());
+            secondURL = response.url().toString();
         }
         catch (Exception ex) {
             ex.printStackTrace();
