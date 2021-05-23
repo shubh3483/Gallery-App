@@ -5,32 +5,28 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_height="match_parent"
     android:layout_width="match_parent">
-    <ScrollView
-        android:orientation="vertical"
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/list"
         android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/noItemsTV"
+        style="@style/TextAppearance.MaterialComponents.Headline5"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        app:layout_constraintTop_toTopOf="parent"
-        tools:context=".MainActivity">
+        android:layout_marginTop="68dp"
+        android:text="No Items"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.498"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 
-        <LinearLayout
-            android:id="@+id/list"
-            android:orientation="vertical"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:animateLayoutChanges="true"
-            tools:context=".MainActivity"
-            android:padding="8dp">
-
-            <TextView
-                android:id="@+id/noItemsTV"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="No Items"
-                style="@style/TextAppearance.MaterialComponents.Headline5"
-                android:layout_marginLeft="120dp"
-                android:layout_marginTop="20dp"/>
-        </LinearLayout>
-    </ScrollView>
 
     <ImageButton
         android:id="@+id/uploadBtn"

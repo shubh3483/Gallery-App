@@ -17,6 +17,7 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
+import androidx.recyclerview.widget.LinearLayoutManager;
 
 
 import com.bumptech.glide.Glide;
@@ -98,7 +99,7 @@ public class MainActivity extends AppCompatActivity implements ItemHelper.OnComp
         if(allItems != null){
             for(Item item : allItems){
 
-                //Bind Data
+                /*//Bind Data
                 ItemCardBinding binding = ItemCardBinding.inflate(getLayoutInflater());
                 if(item.imageRedirectedUrl != null){
                     Glide.with(this)
@@ -116,7 +117,9 @@ public class MainActivity extends AppCompatActivity implements ItemHelper.OnComp
                 binding.title.setText(item.label);
                 binding.title.setBackgroundColor(item.color);
 
-                b.list.addView(binding.getRoot());
+                b.list.addView(binding.getRoot());*/
+
+                setUpRecyclerView(item);
             }
         }
         else{
@@ -137,7 +140,7 @@ public class MainActivity extends AppCompatActivity implements ItemHelper.OnComp
         if(allItems != null){
             for(Item item : allItems){
                 //Bind Data
-                ItemCardBinding binding = ItemCardBinding.inflate(getLayoutInflater());
+                /*ItemCardBinding binding = ItemCardBinding.inflate(getLayoutInflater());
                 if(item.imageRedirectedUrl != null){
                     Glide.with(this)
                             .asBitmap()
@@ -154,7 +157,8 @@ public class MainActivity extends AppCompatActivity implements ItemHelper.OnComp
                 binding.title.setText(item.label);
                 binding.title.setBackgroundColor(item.color);
 
-                b.list.addView(binding.getRoot());
+                b.list.addView(binding.getRoot());*/
+                setUpRecyclerView(item);
             }
         }
         else{
@@ -190,15 +194,16 @@ public class MainActivity extends AppCompatActivity implements ItemHelper.OnComp
 
 
     /**
-     * The below two methods will add the item card to the view.
+     * The below method will call another method and item will be passed which will be added accordingly
+     * into the recycler view.
      */
     private void showAddImageDialog() {
         new AddImageDialog()
                 .show(this, new AddImageDialog.OnCompleteListener() {
                     @Override
                     public void onImageAdded(Item item) {
-
-                        inflateViewForItem(item);
+                        allItems.add(item);
+                        setUpRecyclerView(item);
                     }
 
                     @Override
@@ -211,38 +216,17 @@ public class MainActivity extends AppCompatActivity implements ItemHelper.OnComp
                 });
     }
 
-    @SuppressLint("UseCompatLoadingForDrawables")
-    private void inflateViewForItem(Item item) {
+    /**
+     * This method will call adapter of ItemAdapter to add the card into the recycler view.
+     * @param item
+     */
+    private void setUpRecyclerView(Item item){
 
-        //This is adding items in array list
-        allItems.add(item);
-
-        //Inflate Layout
-        ItemCardBinding binding = ItemCardBinding.inflate(getLayoutInflater());
-
-
-        //Bind Data
-        if(item.imageRedirectedUrl != null){
-            Glide.with(this)
-                    .asBitmap()
-                    .load(item.imageRedirectedUrl)
-                    .into(binding.imageView);
-        }
-        else{
-            Glide.with(this)
-                    .asBitmap()
-                    .load(Uri.parse(item.uri))
-                    .into(binding.imageView);
-        }
-        //binding.imageView.setImageBitmap(bitmapFromString);
-        binding.title.setText(item.label);
-        binding.title.setBackgroundColor(item.color);
-
-        //Hiding the No Items text view from the main activity if the item is added.
-        b.noItemsTV.setVisibility(View.GONE);
-        //Add it to the list
-        b.list.addView(binding.getRoot());
+        ItemAdapter adapter = new ItemAdapter(this, item, allItems);
+        b.list.setLayoutManager(new LinearLayoutManager(this));
+        b.list.setAdapter(adapter);
     }
+
 
     /**
      * These 2 methods are the methods that will allow the user to upload the image from the gallery
@@ -318,7 +302,9 @@ public class MainActivity extends AppCompatActivity implements ItemHelper.OnComp
 
     @Override
     public void onImageAdded(Item item) {
-        inflateViewForItem(item);
+
+        allItems.add(item);
+        setUpRecyclerView(item);
     }
 
     @Override
