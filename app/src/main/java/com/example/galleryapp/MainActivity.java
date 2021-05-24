@@ -22,7 +22,9 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.SearchView;
 import androidx.core.app.ActivityCompat;
+import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 
 import com.bumptech.glide.Glide;
@@ -30,6 +32,7 @@ import com.example.galleryapp.databinding.ActivityMainBinding;
 import com.example.galleryapp.databinding.ItemCardBinding;
 import com.example.galleryapp.models.Item;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
+import com.google.android.material.snackbar.Snackbar;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
@@ -47,6 +50,8 @@ public class MainActivity extends AppCompatActivity implements ItemHelper.OnComp
     Gson gson = new Gson();
     private static final int SELECT_PICTURE = 0;
     private boolean isSorted;
+    ItemTouchHelper itemTouchHelper;
+    ItemAdapter adapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -149,10 +154,7 @@ public class MainActivity extends AppCompatActivity implements ItemHelper.OnComp
         }
         }
 
-
-
-
-    /**
+        /**
      * This method will show the add image option in our main activity.
      * @param menu
      * @return
@@ -217,14 +219,19 @@ public class MainActivity extends AppCompatActivity implements ItemHelper.OnComp
             isSorted = true;
             List<Item> sortedItems = new ArrayList<>(allItems);
             Collections.sort(sortedItems, (p1,p2) -> p1.label.compareTo(p2.label));
-            ItemAdapter adapter = new ItemAdapter(this, sortedItems);
-            adapter.showSortedItems();
-            b.list.setAdapter(adapter);
+            if(adapter != null){
+                adapter.requiredNewItemList = sortedItems;
+                adapter.showSortedItems();
+                b.list.setAdapter(adapter);
+            }
         }else{
             isSorted = false;
-            ItemAdapter adapter = new ItemAdapter(this, allItems);
-            adapter.showSortedItems();
-            b.list.setAdapter(adapter);
+            if(adapter != null){
+                adapter.requiredNewItemList = allItems;
+                adapter.showSortedItems();
+                b.list.setAdapter(adapter);
+            }
+
         }
     }
 
@@ -256,11 +263,26 @@ public class MainActivity extends AppCompatActivity implements ItemHelper.OnComp
      *
      */
     private void setUpRecyclerView(){
-        ItemAdapter adapter = new ItemAdapter(this, allItems);
+
+        if(adapter == null){
+            adapter = new ItemAdapter(this, allItems);
+        }else{
+            adapter.itemsList = allItems;
+        }
         b.list.setLayoutManager(new LinearLayoutManager(this));
         b.list.setAdapter(adapter);
+        itemRemove();
     }
 
+    /**
+     * Below code is the code for swipe functionality that will remove the card from the
+     * recycler view.
+     */
+    private void itemRemove() {
+        itemTouchHelper = new ItemTouchHelper(new SwipeToDeleteCallback(adapter));
+        adapter.notifyDataSetChanged();
+        itemTouchHelper.attachToRecyclerView(b.list);
+    }
 
     /**
      * These 2 methods are the methods that will allow the user to upload the image from the gallery
