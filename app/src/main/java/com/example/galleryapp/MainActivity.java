@@ -15,6 +15,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 
+import android.widget.Adapter;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -33,6 +34,8 @@ import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
@@ -43,6 +46,7 @@ public class MainActivity extends AppCompatActivity implements ItemHelper.OnComp
     List<Item> allItems = new ArrayList<>();
     Gson gson = new Gson();
     private static final int SELECT_PICTURE = 0;
+    private boolean isSorted;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -198,7 +202,30 @@ public class MainActivity extends AppCompatActivity implements ItemHelper.OnComp
             showAddImageDialog();
             return true;
         }
+        if(item.getItemId() == R.id.sort){
+            sortList();
+            return true;
+        }
         return false;
+    }
+
+    /**
+     * This function will sort the list alphabetically.
+     */
+    private void sortList() {
+        if(!isSorted){
+            isSorted = true;
+            List<Item> sortedItems = new ArrayList<>(allItems);
+            Collections.sort(sortedItems, (p1,p2) -> p1.label.compareTo(p2.label));
+            ItemAdapter adapter = new ItemAdapter(this, sortedItems);
+            adapter.showSortedItems();
+            b.list.setAdapter(adapter);
+        }else{
+            isSorted = false;
+            ItemAdapter adapter = new ItemAdapter(this, allItems);
+            adapter.showSortedItems();
+            b.list.setAdapter(adapter);
+        }
     }
 
     /**

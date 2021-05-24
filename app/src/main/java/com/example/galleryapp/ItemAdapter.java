@@ -18,7 +18,7 @@ public class ItemAdapter extends RecyclerView.Adapter<ItemAdapter.ItemViewHolder
 
     private Context context;
     String finalUriOrUrl = "";
-    List<Item> itemsList, searchedItemList;
+    List<Item> itemsList, requiredNewItemList;
 
     /**
      * This is needed when we are filtering to avoid reference issues.
@@ -27,7 +27,7 @@ public class ItemAdapter extends RecyclerView.Adapter<ItemAdapter.ItemViewHolder
     public ItemAdapter(Context context) {
         this.context = context;
         itemsList = new ArrayList<>();
-        searchedItemList = new ArrayList<>();
+        requiredNewItemList = new ArrayList<>();
     }
 
     /**
@@ -37,7 +37,7 @@ public class ItemAdapter extends RecyclerView.Adapter<ItemAdapter.ItemViewHolder
      */
     public ItemAdapter(Context context, List<Item> itemsList){
         this.itemsList = itemsList;
-        searchedItemList = itemsList;
+        requiredNewItemList = itemsList;
         this.context = context;
     }
 
@@ -52,7 +52,7 @@ public class ItemAdapter extends RecyclerView.Adapter<ItemAdapter.ItemViewHolder
     @Override
     public void onBindViewHolder(@NonNull ItemAdapter.ItemViewHolder holder, int position) {
 
-        Item item = searchedItemList.get(position);
+        Item item = requiredNewItemList.get(position);
         finalUriOrUrl = checkUrlOrURi(item);
         Glide.with(context)
                 .load(finalUriOrUrl)
@@ -70,7 +70,7 @@ public class ItemAdapter extends RecyclerView.Adapter<ItemAdapter.ItemViewHolder
 
     @Override
     public int getItemCount() {
-        return searchedItemList.size();
+        return requiredNewItemList.size();
     }
 
     /**
@@ -81,16 +81,20 @@ public class ItemAdapter extends RecyclerView.Adapter<ItemAdapter.ItemViewHolder
     public void filter(String query, List<Item> itemsList) {
 
         if(query.trim().isEmpty()){
-            searchedItemList = itemsList;
+            requiredNewItemList = itemsList;
             return;
         }
         query = query.trim().toLowerCase();
-        searchedItemList.clear();
+        requiredNewItemList.clear();
         for(Item item : itemsList){
             if(item.label.toLowerCase().contains(query)){
-                searchedItemList.add(item);
+                requiredNewItemList.add(item);
             }
         }
+        notifyDataSetChanged();
+    }
+
+    public void showSortedItems() {
         notifyDataSetChanged();
     }
 

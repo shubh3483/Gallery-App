@@ -8,6 +8,11 @@
         android:title="Search"
         app:actionViewClass="androidx.appcompat.widget.SearchView"/>
 
+    <item android:id="@+id/sort"
+        android:title="Sort"
+        app:showAsAction="always"
+        android:icon="@drawable/ic_sort"/>
+
     <item android:id="@+id/addImage"
         android:icon="@drawable/ic_add_image"
         app:showAsAction="always"
