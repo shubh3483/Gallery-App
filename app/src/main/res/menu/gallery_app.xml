@@ -2,12 +2,15 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
+    <item android:id="@+id/search"
+        android:icon="@drawable/ic_search"
+        app:showAsAction="always"
+        android:title="Search"
+        app:actionViewClass="androidx.appcompat.widget.SearchView"/>
+
     <item android:id="@+id/addImage"
         android:icon="@drawable/ic_add_image"
         app:showAsAction="always"
         android:title="Add Image"/>
-
-
-
 
 </menu>

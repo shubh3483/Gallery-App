@@ -17,15 +17,28 @@ import java.util.List;
 public class ItemAdapter extends RecyclerView.Adapter<ItemAdapter.ItemViewHolder> {
 
     private Context context;
-    private Item item;
     String finalUriOrUrl = "";
-    List<Item> itemsList = new ArrayList<>();
-    static int count = 0;
+    List<Item> itemsList, searchedItemList;
 
-    public ItemAdapter(Context context, Item item, List<Item> itemsList){
-        this.itemsList = itemsList;
+    /**
+     * This is needed when we are filtering to avoid reference issues.
+     * @param context
+     */
+    public ItemAdapter(Context context) {
         this.context = context;
-        this.item = item;
+        itemsList = new ArrayList<>();
+        searchedItemList = new ArrayList<>();
+    }
+
+    /**
+     * This is needed when we are fetching new image.
+     * @param context
+     * @param itemsList
+     */
+    public ItemAdapter(Context context, List<Item> itemsList){
+        this.itemsList = itemsList;
+        searchedItemList = itemsList;
+        this.context = context;
     }
 
     @NonNull
@@ -39,7 +52,7 @@ public class ItemAdapter extends RecyclerView.Adapter<ItemAdapter.ItemViewHolder
     @Override
     public void onBindViewHolder(@NonNull ItemAdapter.ItemViewHolder holder, int position) {
 
-        Item item = itemsList.get(position);
+        Item item = searchedItemList.get(position);
         finalUriOrUrl = checkUrlOrURi(item);
         Glide.with(context)
                 .load(finalUriOrUrl)
@@ -57,7 +70,28 @@ public class ItemAdapter extends RecyclerView.Adapter<ItemAdapter.ItemViewHolder
 
     @Override
     public int getItemCount() {
-        return itemsList.size();
+        return searchedItemList.size();
+    }
+
+    /**
+     * This function will filter the particular card.
+     * @param query
+     * @param itemsList
+     */
+    public void filter(String query, List<Item> itemsList) {
+
+        if(query.trim().isEmpty()){
+            searchedItemList = itemsList;
+            return;
+        }
+        query = query.trim().toLowerCase();
+        searchedItemList.clear();
+        for(Item item : itemsList){
+            if(item.label.toLowerCase().contains(query)){
+                searchedItemList.add(item);
+            }
+        }
+        notifyDataSetChanged();
     }
 
     static class ItemViewHolder extends RecyclerView.ViewHolder{

@@ -2,6 +2,8 @@ package com.example.galleryapp;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
+import android.app.SearchManager;
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
@@ -12,10 +14,12 @@ import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.SearchView;
 import androidx.core.app.ActivityCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
@@ -97,30 +101,7 @@ public class MainActivity extends AppCompatActivity implements ItemHelper.OnComp
         allItems = gson.fromJson(json, new TypeToken<List<Item>>() {
         }.getType());
         if(allItems != null){
-            for(Item item : allItems){
-
-                /*//Bind Data
-                ItemCardBinding binding = ItemCardBinding.inflate(getLayoutInflater());
-                if(item.imageRedirectedUrl != null){
-                    Glide.with(this)
-                            .asBitmap()
-                            .load(item.imageRedirectedUrl)
-                            .into(binding.imageView);
-                }
-                else{
-                    Glide.with(this)
-                            .asBitmap()
-                            .load(Uri.parse(item.uri))
-                            .into(binding.imageView);
-                }
-                //binding.imageView.setImageBitmap(bitmapFromString);
-                binding.title.setText(item.label);
-                binding.title.setBackgroundColor(item.color);
-
-                b.list.addView(binding.getRoot());*/
-
-                setUpRecyclerView(item);
-            }
+            setUpRecyclerView();
         }
         else{
             allItems = new ArrayList<>();
@@ -138,9 +119,9 @@ public class MainActivity extends AppCompatActivity implements ItemHelper.OnComp
         allItems = gson.fromJson(json, new TypeToken<List<Item>>() {
         }.getType());
         if(allItems != null){
-            for(Item item : allItems){
+            /*for(Item item : allItems){
                 //Bind Data
-                /*ItemCardBinding binding = ItemCardBinding.inflate(getLayoutInflater());
+                *//*ItemCardBinding binding = ItemCardBinding.inflate(getLayoutInflater());
                 if(item.imageRedirectedUrl != null){
                     Glide.with(this)
                             .asBitmap()
@@ -158,13 +139,13 @@ public class MainActivity extends AppCompatActivity implements ItemHelper.OnComp
                 binding.title.setBackgroundColor(item.color);
 
                 b.list.addView(binding.getRoot());*/
-                setUpRecyclerView(item);
-            }
-        }
-        else{
+                setUpRecyclerView();
+            }else{
             allItems = new ArrayList<>();
         }
-    }
+        }
+
+
 
 
     /**
@@ -175,6 +156,34 @@ public class MainActivity extends AppCompatActivity implements ItemHelper.OnComp
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.gallery_app, menu);
+
+        SearchView searchView = (SearchView)menu.findItem(R.id.search).getActionView();
+
+        /**
+         * Listener for SearchView
+         */
+        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+            @Override
+            public boolean onQueryTextSubmit(String query) {
+                ItemAdapter adapter = new ItemAdapter(MainActivity.this);
+                adapter.filter(query, allItems);
+                return true;
+            }
+
+            @Override
+            public boolean onQueryTextChange(String newText) {
+
+                /**
+                 * We are creating new reference of adapter everytime so that whenever user removes
+                 * the filter search, the lists should not be pointing to the same reference and this
+                 * was the main cause of the bug in the code(Resolved).
+                 */
+                ItemAdapter adapter = new ItemAdapter(MainActivity.this);
+                adapter.filter(newText, allItems);
+                b.list.setAdapter(adapter);
+                return true;
+            }
+        });
         return true;
     }
 
@@ -192,7 +201,6 @@ public class MainActivity extends AppCompatActivity implements ItemHelper.OnComp
         return false;
     }
 
-
     /**
      * The below method will call another method and item will be passed which will be added accordingly
      * into the recycler view.
@@ -203,7 +211,7 @@ public class MainActivity extends AppCompatActivity implements ItemHelper.OnComp
                     @Override
                     public void onImageAdded(Item item) {
                         allItems.add(item);
-                        setUpRecyclerView(item);
+                        setUpRecyclerView();
                     }
 
                     @Override
@@ -218,11 +226,10 @@ public class MainActivity extends AppCompatActivity implements ItemHelper.OnComp
 
     /**
      * This method will call adapter of ItemAdapter to add the card into the recycler view.
-     * @param item
+     *
      */
-    private void setUpRecyclerView(Item item){
-
-        ItemAdapter adapter = new ItemAdapter(this, item, allItems);
+    private void setUpRecyclerView(){
+        ItemAdapter adapter = new ItemAdapter(this, allItems);
         b.list.setLayoutManager(new LinearLayoutManager(this));
         b.list.setAdapter(adapter);
     }
@@ -304,7 +311,7 @@ public class MainActivity extends AppCompatActivity implements ItemHelper.OnComp
     public void onImageAdded(Item item) {
 
         allItems.add(item);
-        setUpRecyclerView(item);
+        setUpRecyclerView();
     }
 
     @Override
