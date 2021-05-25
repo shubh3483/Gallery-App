@@ -11,6 +11,8 @@ Download Apk from here : https://github.com/shubh3483/Gallery-App/releases/downl
 
 Switch to master branch : https://github.com/shubh3483/Gallery-App/tree/master
 
+Switch to Recycler View branch from here(Contains additional functionality) : https://github.com/shubh3483/Gallery-App/tree/RecyclerView
+
 A video is also attached for the reference 
 
 
