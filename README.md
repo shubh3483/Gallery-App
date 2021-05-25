@@ -12,7 +12,7 @@ Functionalities :
 7) Swipe to delete
 8) Drag and drop.
 
-Download Apk from here : 
+Download Apk from here : https://github.com/shubh3483/Gallery-App/releases/download/v6.3/app-debug.apk
 
 Switch to master branch : https://github.com/shubh3483/Gallery-App/tree/master
 
