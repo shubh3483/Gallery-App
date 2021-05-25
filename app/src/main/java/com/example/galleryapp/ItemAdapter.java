@@ -12,6 +12,7 @@ import com.example.galleryapp.databinding.ItemCardBinding;
 import com.example.galleryapp.models.Item;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 public class ItemAdapter extends RecyclerView.Adapter<ItemAdapter.ItemViewHolder> {
@@ -96,6 +97,19 @@ public class ItemAdapter extends RecyclerView.Adapter<ItemAdapter.ItemViewHolder
 
     public void showSortedItems() {
         notifyDataSetChanged();
+    }
+
+    public void onItemMove(int fromPosition, int toPosition) {
+        if (fromPosition < toPosition) {
+            for (int i = fromPosition; i < toPosition; i++) {
+                Collections.swap(requiredNewItemList, i, i + 1);
+            }
+        } else {
+            for (int i = fromPosition; i > toPosition; i--) {
+                Collections.swap(requiredNewItemList, i, i - 1);
+            }
+        }
+        notifyItemMoved(fromPosition, toPosition);
     }
 
     static class ItemViewHolder extends RecyclerView.ViewHolder{
