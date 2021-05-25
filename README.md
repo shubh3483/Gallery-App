@@ -5,6 +5,8 @@ Download Apk from here (master branch) : https://github.com/shubh3483/Gallery-Ap
 
 Switch to 6.2.2 from here : https://github.com/shubh3483/Gallery-App/tree/6.2.2
 
+Switch to Recycler View branch from here(Contains additional functionality) : https://github.com/shubh3483/Gallery-App/tree/RecyclerView
+
 If you want to download the app that will save the data also switch to : https://github.com/shubh3483/Gallery-App/tree/6.2.2
 and download the Apk from readme file.
 
