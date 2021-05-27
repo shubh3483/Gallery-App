@@ -130,7 +130,7 @@ public class AddImageDialog implements ItemHelper.OnCompleteListener {
                         e.printStackTrace();
                     }
                 }else {
-                    int height = Integer.parseInt(widthStr);
+                    int height = Integer.parseInt(heightStr);
                     int width = Integer.parseInt(widthStr);
                     try {
                         fetchRandomImage(width,height);

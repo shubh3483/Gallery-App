@@ -104,16 +104,18 @@ public class MainActivity extends AppCompatActivity implements ItemHelper.OnComp
      * This method will prevent loss of data when the app is completely stopped.
      */
     private void sharedPreferences() {
-        b.noItemsTV.setVisibility(View.GONE);
+        //b.noItemsTV.setVisibility(View.GONE);
         SharedPreferences preferences = getPreferences(MODE_PRIVATE);
         String json = preferences.getString(Constants.ALL_ITEMS, null);
         allItems = gson.fromJson(json, new TypeToken<List<Item>>() {
         }.getType());
         if(allItems != null){
+            b.noItemsTV.setVisibility(View.GONE);
             setUpRecyclerView();
         }
         else{
             allItems = new ArrayList<>();
+            b.noItemsTV.setVisibility(View.VISIBLE);
         }
     }
 
@@ -123,7 +125,7 @@ public class MainActivity extends AppCompatActivity implements ItemHelper.OnComp
      * @param savedInstanceState
      */
     private void savedInstance(Bundle savedInstanceState) {
-        b.noItemsTV.setVisibility(View.GONE);
+        //b.noItemsTV.setVisibility(View.GONE);
         String json = savedInstanceState.getString(Constants.ALL_ITEMS, null);
         allItems = gson.fromJson(json, new TypeToken<List<Item>>() {
         }.getType());
@@ -148,9 +150,11 @@ public class MainActivity extends AppCompatActivity implements ItemHelper.OnComp
                 binding.title.setBackgroundColor(item.color);
 
                 b.list.addView(binding.getRoot());*/
+                b.noItemsTV.setVisibility(View.GONE);
                 setUpRecyclerView();
             }else{
             allItems = new ArrayList<>();
+            b.noItemsTV.setVisibility(View.VISIBLE);
         }
         }
 
@@ -263,7 +267,7 @@ public class MainActivity extends AppCompatActivity implements ItemHelper.OnComp
      *
      */
     private void setUpRecyclerView(){
-
+        b.noItemsTV.setVisibility(View.GONE);
         if(adapter == null){
             adapter = new ItemAdapter(this, allItems);
         }else{
