@@ -35,7 +35,9 @@ import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
@@ -43,7 +45,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 
-public class MainActivity extends AppCompatActivity implements ItemHelper.OnCompleteListener, GalleryImageUploader.OnCompleteListener, ItemAdapter.onClickListener {
+public class MainActivity extends AppCompatActivity implements ContextMenuHandler.EditItem, ContextMenuHandler.DeleteItem, ItemHelper.OnCompleteListener, GalleryImageUploader.OnCompleteListener, ItemAdapter.onClickListener {
 
     private static final int REQUEST_PERMISSION = 0;
     ActivityMainBinding b;
@@ -55,9 +57,10 @@ public class MainActivity extends AppCompatActivity implements ItemHelper.OnComp
     ItemAdapter adapter;
     private boolean checkDragHandle = true;
     private ActionMode mActionMode;
-    private int mCurrentItemPosition;
-    ContextMenuHandler contextMenuHandler = new ContextMenuHandler(this);
-    int position;
+    private int mCurrentItemPosition = -1;
+    ContextMenuHandler contextMenuHandler = new ContextMenuHandler(this, this, this);
+    //int position;
+    private String sharePath = "no";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -76,14 +79,13 @@ public class MainActivity extends AppCompatActivity implements ItemHelper.OnComp
     }
 
     @Override
-    public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo) {
-        MenuInflater inflater = getMenuInflater();
-        inflater.inflate(R.menu.context_menu, menu);
-    }
-    @Override
     public boolean onContextItemSelected(MenuItem item) {
         int id = item.getItemId();
         if (id == R.id.editItem) {
+            System.out.println(allItems);
+            Item item1 = allItems.get(mCurrentItemPosition);
+            contextMenuHandler.editItem(item1);
+            allItems.remove(mCurrentItemPosition);
             Toast.makeText(this, "Editing ", Toast.LENGTH_SHORT).show();
         }
 
@@ -93,23 +95,12 @@ public class MainActivity extends AppCompatActivity implements ItemHelper.OnComp
         }
 
         if(id == R.id.deleteItem) {
-            Toast.makeText(this, "Deleting", Toast.LENGTH_SHORT).show();
+            System.out.println(mCurrentItemPosition);
+            contextMenuHandler.deleteItem(mCurrentItemPosition);
         }
         return true;
     }
 
-    private void setUpOnLongClickListener() {
-
-        adapter.setOnLongItemClickListener(new ItemAdapter.onLongItemClickListener() {
-            @Override
-            public void ItemLongClicked(View v, int position) {
-                mCurrentItemPosition = position;
-                v.showContextMenu();
-            }
-
-        });
-
-    }
 
     /**
      * This method is to show no items in main activity when there are no items. Separate method is
@@ -185,26 +176,7 @@ public class MainActivity extends AppCompatActivity implements ItemHelper.OnComp
         allItems = gson.fromJson(json, new TypeToken<List<Item>>() {
         }.getType());
         if(allItems != null){
-            /*for(Item item : allItems){
-                //Bind Data
-                *//*ItemCardBinding binding = ItemCardBinding.inflate(getLayoutInflater());
-                if(item.imageRedirectedUrl != null){
-                    Glide.with(this)
-                            .asBitmap()
-                            .load(item.imageRedirectedUrl)
-                            .into(binding.imageView);
-                }
-                else{
-                    Glide.with(this)
-                            .asBitmap()
-                            .load(Uri.parse(item.uri))
-                            .into(binding.imageView);
-                }
-                //binding.imageView.setImageBitmap(bitmapFromString);
-                binding.title.setText(item.label);
-                binding.title.setBackgroundColor(item.color);
 
-                b.list.addView(binding.getRoot());*/
                 b.noItemsTV.setVisibility(View.GONE);
                 setUpRecyclerView();
             }else{
@@ -270,18 +242,14 @@ public class MainActivity extends AppCompatActivity implements ItemHelper.OnComp
         }
         if(item.getItemId() == R.id.dragHandle){
             if(checkDragHandle){
-                setUpOnLongClickListener();
                 Toast.makeText(this, "Drag and drop disabled", Toast.LENGTH_SHORT).show();
                 checkDragHandle = false;
-                itemTouchHelper.attachToRecyclerView(null);
-                //itemTouchHelper = new ItemTouchHelper(new SwipeToDeleteCallback(adapter, this));
-                //onLongForActionBar();
             }
             else {
                 Toast.makeText(this, "Drag and drop Enabled", Toast.LENGTH_SHORT).show();
                 checkDragHandle = true;
-                itemTouchHelper.attachToRecyclerView(b.list);
             }
+            setUpRecyclerView();
             return true;
         }
         return false;
@@ -344,9 +312,10 @@ public class MainActivity extends AppCompatActivity implements ItemHelper.OnComp
         b.list.setVisibility(View.VISIBLE);
         b.noItemsTV.setVisibility(View.GONE);
         if(adapter == null){
-            adapter = new ItemAdapter(this, allItems, this);
+            adapter = new ItemAdapter(this, allItems,checkDragHandle, this);
         }else{
             adapter.itemsList = allItems;
+            adapter.checkDragHandle = checkDragHandle;
         }
         b.list.setLayoutManager(new LinearLayoutManager(this));
         b.list.setAdapter(adapter);
@@ -360,7 +329,9 @@ public class MainActivity extends AppCompatActivity implements ItemHelper.OnComp
     private void itemRemove() {
         itemTouchHelper = new ItemTouchHelper(new SwipeToDeleteCallback(adapter, this));
         adapter.notifyDataSetChanged();
-        itemTouchHelper.attachToRecyclerView(b.list);
+        if(checkDragHandle)
+        itemTouchHelper.attachToRecyclerView(null);
+        else itemTouchHelper.attachToRecyclerView(b.list);
     }
 
     /**
@@ -385,6 +356,16 @@ public class MainActivity extends AppCompatActivity implements ItemHelper.OnComp
         intent.setType("image/*");
         intent.setAction(Intent.ACTION_GET_CONTENT);
         startActivityForResult(Intent.createChooser(intent, "Select Picture"), SELECT_PICTURE);
+    }
+
+    /**
+     * This method will delete the item from recycler view.
+     * @param position
+     */
+    private void deleteItem(int position) {
+        allItems.remove(position);
+        setUpRecyclerView();
+        Toast.makeText(this, "Deleted Successfully", Toast.LENGTH_SHORT).show();
     }
 
     /**
@@ -426,9 +407,7 @@ public class MainActivity extends AppCompatActivity implements ItemHelper.OnComp
     }
 
     @Override
-    public void onFetched(String redirectedUrl, Set<Integer> colors, List<String> labels) {
-
-    }
+    public void onFetched(String redirectedUrl, Set<Integer> colors, List<String> labels) {}
 
     @Override
     public void setError(String error) {
@@ -436,7 +415,7 @@ public class MainActivity extends AppCompatActivity implements ItemHelper.OnComp
     }
 
     @Override
-    public void onImageAdded(Item item) {
+    public void onGalleryImageAdded(Item item) {
 
         allItems.add(item);
         setUpRecyclerView();
@@ -447,8 +426,31 @@ public class MainActivity extends AppCompatActivity implements ItemHelper.OnComp
 
     }
 
+    /**
+     * This is the callback from contextMenu and it returns the position of the selected item.
+     * @param position
+     */
     @Override
     public void position(int position) {
-        this.position = position;
+        mCurrentItemPosition = position;
+    }
+
+    /**
+     * This is the callback received after the user confirms that he wants to delete the item
+     * @param position
+     */
+    @Override
+    public void deleteItemCallback(int position) {
+        deleteItem(position);
+    }
+
+    @Override
+    public void editedItemCallBack(Item item) {
+        editItem(item);
+    }
+
+    private void editItem(Item item) {
+        allItems.add(mCurrentItemPosition, item);
+        setUpRecyclerView();
     }
 }

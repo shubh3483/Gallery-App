@@ -4,8 +4,6 @@ import android.app.Activity;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
-import android.content.pm.PackageInfo;
-import android.content.pm.PackageManager;
 import android.content.res.ColorStateList;
 import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
@@ -26,7 +24,6 @@ import androidx.appcompat.app.AlertDialog;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.target.CustomTarget;
-import com.bumptech.glide.request.target.Target;
 import com.bumptech.glide.request.transition.Transition;
 import com.example.galleryapp.databinding.ChipColourBinding;
 import com.example.galleryapp.databinding.ChipLabelBinding;
@@ -34,9 +31,7 @@ import com.example.galleryapp.databinding.DialogAddImageBinding;
 import com.example.galleryapp.models.Item;
 import com.google.android.material.chip.Chip;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
-import com.squareup.picasso.Picasso;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.List;
@@ -52,6 +47,8 @@ public class AddImageDialog implements ItemHelper.OnCompleteListener {
     private Bitmap image;
     private String redirectedUrl = "";
     private AlertDialog dialog;
+    int previousItemColor = 0;
+    String previousItemLabel = null;
 
     void show(Context context, OnCompleteListener listener){
         this.context = context;
@@ -182,8 +179,41 @@ public class AddImageDialog implements ItemHelper.OnCompleteListener {
                 .asBitmap()
                 .load(redirectedUrl)
                 .into(b.imageView);
-        inflateColourChips(colors);
-        inflateLabelChips(labels);
+        inflateColourChips(colors, false);
+        inflateLabelChips(labels, false);
+        b.progressIndicatorRoot.setVisibility(View.GONE);
+        b.addBtn.setText("ADD");
+        b.mainRoot.setVisibility(View.VISIBLE);
+        b.customInput.setVisibility(View.GONE);
+        handleCustomInputLayout();
+        handleAddImageEvent();
+        handleShareImageEvent();
+    }
+
+    public void showForEditData(Context context, String redirectedUrl, Set<Integer> colors,
+                                List<String> labels, OnCompleteListener listener, int previousItemColor, String previousItemLabel){
+        if(context instanceof MainActivity){
+            inflater = ((MainActivity) context).getLayoutInflater();
+            b = DialogAddImageBinding.inflate(inflater);
+        }else{
+            dialog.dismiss();
+            listener.onError("Cast Exception");
+            return;
+        }
+        dialog = new MaterialAlertDialogBuilder(context, R.style.CustomDialogTheme)
+                .setView(b.getRoot())
+                .show();
+        this.redirectedUrl = redirectedUrl;
+        this.previousItemColor = previousItemColor;
+        this.previousItemLabel = previousItemLabel;
+        this.listener = listener;
+        b.addBtn.setText("EDIT");
+        Glide.with(context)
+                .asBitmap()
+                .load(redirectedUrl)
+                .into(b.imageView);
+        inflateColourChips(colors, true);
+        inflateLabelChips(labels, true);
         b.progressIndicatorRoot.setVisibility(View.GONE);
         b.mainRoot.setVisibility(View.VISIBLE);
         b.customInput.setVisibility(View.GONE);
@@ -326,7 +356,7 @@ public class AddImageDialog implements ItemHelper.OnCompleteListener {
      * @param labels
      */
 
-    private void inflateLabelChips(List<String> labels) {
+    /*private void inflateLabelChips(List<String> labels) {
         for(String label : labels){
             ChipLabelBinding binding = ChipLabelBinding.inflate(inflater);
             binding.getRoot().setText(label);
@@ -339,6 +369,67 @@ public class AddImageDialog implements ItemHelper.OnCompleteListener {
             ChipColourBinding binding = ChipColourBinding.inflate(inflater);
             binding.getRoot().setChipBackgroundColor(ColorStateList.valueOf(colour));
             b.colourPaletteChipGrp.addView(binding.getRoot());
+        }
+    }*/
+    private void inflateLabelChips(List<String> labels, boolean isEdit) {
+        if(isEdit) {
+            boolean labelChecker = false;
+            for (String label : labels) {
+                if (label.equals(previousItemLabel)) {
+                    ChipLabelBinding binding = ChipLabelBinding.inflate(inflater);
+                    binding.getRoot().setText(label);
+                    b.labelChipGrp.addView(binding.getRoot());
+                    binding.getRoot().setChecked(true);
+                    labelChecker = true;
+                } else {
+                    ChipLabelBinding binding = ChipLabelBinding.inflate(inflater);
+                    binding.getRoot().setText(label);
+                    b.labelChipGrp.addView(binding.getRoot());
+                }
+            }
+            if (!labelChecker) {
+                ChipLabelBinding binding = ChipLabelBinding.inflate(inflater);
+                binding.getRoot().setText(previousItemLabel);
+                b.labelChipGrp.addView(binding.getRoot());
+                binding.getRoot().setChecked(true);
+            }
+        }else{
+            for (String label : labels) {
+                ChipLabelBinding binding = ChipLabelBinding.inflate(inflater);
+                binding.getRoot().setText(label);
+                b.labelChipGrp.addView(binding.getRoot());
+            }
+        }
+    }
+
+    private void inflateColourChips(Set<Integer> colors, boolean isEdit) {
+        if(isEdit){
+            boolean colorChecker = false;
+            for (int colour : colors) {
+                if (colour == previousItemColor) {
+                    ChipColourBinding binding = ChipColourBinding.inflate(inflater);
+                    binding.getRoot().setChipBackgroundColor(ColorStateList.valueOf(colour));
+                    b.colourPaletteChipGrp.addView(binding.getRoot());
+                    binding.getRoot().setChecked(true);
+                    colorChecker = true;
+                } else {
+                    ChipColourBinding binding = ChipColourBinding.inflate(inflater);
+                    binding.getRoot().setChipBackgroundColor(ColorStateList.valueOf(colour));
+                    b.colourPaletteChipGrp.addView(binding.getRoot());
+                }
+            }
+            if (!colorChecker) {
+                ChipColourBinding binding = ChipColourBinding.inflate(inflater);
+                binding.getRoot().setChipBackgroundColor(ColorStateList.valueOf(previousItemColor));
+                b.colourPaletteChipGrp.addView(binding.getRoot());
+                binding.getRoot().setChecked(true);
+            }
+        }else {
+            for (int colour : colors) {
+                ChipColourBinding binding = ChipColourBinding.inflate(inflater);
+                binding.getRoot().setChipBackgroundColor(ColorStateList.valueOf(colour));
+                b.colourPaletteChipGrp.addView(binding.getRoot());
+            }
         }
     }
 

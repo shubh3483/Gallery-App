@@ -26,7 +26,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-public class ItemHelper /*extends AsyncTask<Void, Void, Void>*/{
+public class ItemHelper{
 
     private Context context;
     private OnCompleteListener listener;
@@ -50,21 +50,24 @@ public class ItemHelper /*extends AsyncTask<Void, Void, Void>*/{
     void fetchData(int x, int y, Context context, OnCompleteListener listener) throws IOException {
         this.context = context;
         this.listener = listener;
-        fetchImage(String.format(rectangleImageURL, x, y));
+        fetchImage(String.format(rectangleImageURL, x, y), context, listener);
     }
 
     void fetchData(int x, Context context, OnCompleteListener listener) throws IOException {
         this.context = context;
         this.listener = listener;
-        fetchImage(String.format(squareImageURL, x));
+        fetchImage(String.format(squareImageURL, x), context, listener);
     }
 
     /**
      * This method will fetch image according to the URL passed into it.
      * @param url
      */
-    void fetchImage(String url) {
-
+    void fetchImage(String url, Context context, OnCompleteListener listener) {
+        if(this.context == null && this.listener == null){
+            this.context = context;
+            this.listener = listener;
+        }
         new RedirectedUrlHelper().getRedirectedUrl(new RedirectedUrlHelper.OnCompleteListener() {
             @Override
             public void onFetched(String fetchedUrl) {

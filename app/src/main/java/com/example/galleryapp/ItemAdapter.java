@@ -26,9 +26,9 @@ public class ItemAdapter extends RecyclerView.Adapter<ItemAdapter.ItemViewHolder
     String finalUriOrUrl = "";
     List<Item> itemsList, requiredNewItemList;
     ActivityMainBinding b;
+    int position = 0;
     onClickListener listener;
-    onLongItemClickListener mOnLongItemClickListener;
-    //public int lastSelected;
+    boolean checkDragHandle;
 
     /**
      * This is needed when we are filtering to avoid reference issues.
@@ -45,11 +45,12 @@ public class ItemAdapter extends RecyclerView.Adapter<ItemAdapter.ItemViewHolder
      * @param context
      * @param itemsList
      */
-    public ItemAdapter(Context context, List<Item> itemsList, onClickListener listener){
+    public ItemAdapter(Context context, List<Item> itemsList, boolean checkDragHandle, onClickListener listener){
         this.itemsList = itemsList;
         requiredNewItemList = itemsList;
         this.context = context;
         this.listener = listener;
+        this.checkDragHandle = checkDragHandle;
         b = ActivityMainBinding.inflate(LayoutInflater.from(context));
     }
 
@@ -65,8 +66,6 @@ public class ItemAdapter extends RecyclerView.Adapter<ItemAdapter.ItemViewHolder
     @Override
     public void onBindViewHolder(@NonNull ItemAdapter.ItemViewHolder holder, int position) {
 
-
-        ItemCardBinding tempBinding = ((ItemViewHolder)holder).b;
         Item item = requiredNewItemList.get(position);
         finalUriOrUrl = checkUrlOrURi(item);
         Glide.with(context)
@@ -74,58 +73,48 @@ public class ItemAdapter extends RecyclerView.Adapter<ItemAdapter.ItemViewHolder
                 .into(holder.b.imageView);
         holder.b.title.setText(item.label);
         holder.b.title.setBackgroundColor(item.color);
-        holder.itemView.setOnLongClickListener(new View.OnLongClickListener() {
-            @Override
-            public boolean onLongClick(View v) {
-                //lastSelected = holder.getAdapterPosition();
-                if (mOnLongItemClickListener != null) {
-                    mOnLongItemClickListener.ItemLongClicked(v, position);
-                    return true;
-                }
-                return false;
-            }
-        });
-        //tempMethod(tempBinding.getRoot());
-        /*holder.itemView.setOnLongClickListener(new View.OnLongClickListener() {
-            @Override
-            public boolean onLongClick(View v) {
-                if (mOnLongItemClickListener != null) {
-                    mOnLongItemClickListener.ItemLongClicked(v, position);
-                }
-
-                return true;
-            }
-        });*/
-        /*TODO : holder.b.cardShareBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                listener.position(position);
-            }
-        });*/
-
-    }
-
-    /*private void tempMethod(ConstraintLayout tempBinding) {
-        tempBinding.setOnCreateContextMenuListener(new View.OnCreateContextMenuListener() {
-            @Override
-            public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo) {
-                MainActivity activity = (MainActivity)context;
-                //activity.getMenuInflater();
-                activity.getMenuInflater().inflate(R.menu.context_menu, menu);
-            }
-        });
-    }*/
-
-    private String checkUrlOrURi(Item item) {
-        if(item.imageRedirectedUrl != null){
-            return item.imageRedirectedUrl;
-        }
-        return item.uri;
     }
 
     @Override
     public int getItemCount() {
         return requiredNewItemList.size();
+    }
+
+    class ItemViewHolder extends RecyclerView.ViewHolder implements View.OnLongClickListener, View.OnCreateContextMenuListener {
+        ItemCardBinding b;
+        public ItemViewHolder(ItemCardBinding b){
+            super(b.getRoot());
+            this.b = b;
+            this.b.imageView.setOnCreateContextMenuListener(this);
+        }
+
+        @Override
+        public boolean onLongClick(View v) {
+            return false;
+        }
+
+        @Override
+        public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo) {
+            if(!checkDragHandle) {
+                MenuInflater inflater = ((MainActivity) context).getMenuInflater();
+                inflater.inflate(R.menu.context_menu, menu);
+                position = getAdapterPosition();
+                listener.position(position);
+            }
+        }
+    }
+
+    /**
+     * This function will check whether image is from internet or from the gallery and accordingly
+     * it will load the "URI" or "URL".
+     * @param item
+     * @return
+     */
+    private String checkUrlOrURi(Item item) {
+        if(item.imageRedirectedUrl != null){
+            return item.imageRedirectedUrl;
+        }
+        return item.uri;
     }
 
     /**
@@ -149,10 +138,18 @@ public class ItemAdapter extends RecyclerView.Adapter<ItemAdapter.ItemViewHolder
         notifyDataSetChanged();
     }
 
+    /**
+     * This function will notify to sort the items.
+     */
     public void showSortedItems() {
         notifyDataSetChanged();
     }
 
+    /**
+     * This function is for drag and drop functionality.
+     * @param fromPosition
+     * @param toPosition
+     */
     public void onItemMove(int fromPosition, int toPosition) {
         if (fromPosition < toPosition) {
             for (int i = fromPosition; i < toPosition; i++) {
@@ -166,34 +163,17 @@ public class ItemAdapter extends RecyclerView.Adapter<ItemAdapter.ItemViewHolder
         notifyItemMoved(fromPosition, toPosition);
     }
 
-    static class ItemViewHolder extends RecyclerView.ViewHolder /*implements View.OnLongClickListener, View.OnCreateContextMenuListener*/ {
-        ItemCardBinding b;
-        public ItemViewHolder(ItemCardBinding b){
-            super(b.getRoot());
-            this.b = b;
-            //this.b.imageView.setOnCreateContextMenuListener(this);
-        }
-
-        /*@Override
-        public boolean onLongClick(View v) {
-            return false;
-        }*/
-
-        /*@Override
-        public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo) {
-            MenuInflater inflater = ((MainActivity) context).getMenuInflater();
-            inflater.inflate(R.menu.context_menu, menu);
-        }*/
-    }
-
-    public void setOnLongItemClickListener(onLongItemClickListener mOnLongItemClickListener) {
+    /*public void setOnLongItemClickListener(onLongItemClickListener mOnLongItemClickListener) {
         this.mOnLongItemClickListener = mOnLongItemClickListener;
     }
 
     public interface onLongItemClickListener {
         void ItemLongClicked(View v, int position);
-    }
+    }*/
 
+    /**
+     * This will send the callback to the MainActivity about the position of the item for context menu.
+     */
     interface onClickListener {
         void position(int position);
     }
