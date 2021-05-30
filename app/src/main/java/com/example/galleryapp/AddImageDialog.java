@@ -116,7 +116,7 @@ public class AddImageDialog implements ItemHelper.OnCompleteListener {
                 hideKeyboard();
 
                 if(widthStr.isEmpty()){
-                    int height = Integer.parseInt(widthStr);
+                    int height = Integer.parseInt(heightStr);
                     try {
                         fetchRandomImage(height);
                     } catch (IOException e) {

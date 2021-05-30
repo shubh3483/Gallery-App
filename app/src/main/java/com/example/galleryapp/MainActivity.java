@@ -1,21 +1,22 @@
 package com.example.galleryapp;
 
 import android.Manifest;
-import android.annotation.SuppressLint;
-import android.app.SearchManager;
-import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Environment;
+import android.view.ActionMode;
+import android.view.ContextMenu;
 import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
-
-import android.widget.Adapter;
+import android.widget.ImageView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -26,23 +27,23 @@ import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-
-import com.bumptech.glide.Glide;
 import com.example.galleryapp.databinding.ActivityMainBinding;
-import com.example.galleryapp.databinding.ItemCardBinding;
 import com.example.galleryapp.models.Item;
+import com.google.android.material.card.MaterialCardView;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
-import com.google.android.material.snackbar.Snackbar;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
+import java.io.File;
+import java.io.FileOutputStream;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 
-public class MainActivity extends AppCompatActivity implements ItemHelper.OnCompleteListener, GalleryImageUploader.OnCompleteListener {
+public class MainActivity extends AppCompatActivity implements ItemHelper.OnCompleteListener, GalleryImageUploader.OnCompleteListener, ItemAdapter.onClickListener {
 
     private static final int REQUEST_PERMISSION = 0;
     ActivityMainBinding b;
@@ -52,6 +53,11 @@ public class MainActivity extends AppCompatActivity implements ItemHelper.OnComp
     private boolean isSorted;
     ItemTouchHelper itemTouchHelper;
     ItemAdapter adapter;
+    private boolean checkDragHandle = true;
+    private ActionMode mActionMode;
+    private int mCurrentItemPosition;
+    ContextMenuHandler contextMenuHandler = new ContextMenuHandler(this);
+    int position;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -65,6 +71,55 @@ public class MainActivity extends AppCompatActivity implements ItemHelper.OnComp
             sharedPreferences();
         }
         permissionAccess();
+        checkItemsEmptyOrNot();
+        registerForContextMenu(b.list);
+    }
+
+    @Override
+    public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.context_menu, menu);
+    }
+    @Override
+    public boolean onContextItemSelected(MenuItem item) {
+        int id = item.getItemId();
+        if (id == R.id.editItem) {
+            Toast.makeText(this, "Editing ", Toast.LENGTH_SHORT).show();
+        }
+
+        if (id == R.id.shareItem) {
+            Toast.makeText(this, "Sharing", Toast.LENGTH_SHORT).show();
+            contextMenuHandler.takeScreenshot(mCurrentItemPosition);
+        }
+
+        if(id == R.id.deleteItem) {
+            Toast.makeText(this, "Deleting", Toast.LENGTH_SHORT).show();
+        }
+        return true;
+    }
+
+    private void setUpOnLongClickListener() {
+
+        adapter.setOnLongItemClickListener(new ItemAdapter.onLongItemClickListener() {
+            @Override
+            public void ItemLongClicked(View v, int position) {
+                mCurrentItemPosition = position;
+                v.showContextMenu();
+            }
+
+        });
+
+    }
+
+    /**
+     * This method is to show no items in main activity when there are no items. Separate method is
+     * made because it might be possible that allItems is not NULL but EMPTY.
+     */
+    private void checkItemsEmptyOrNot() {
+        if(allItems.isEmpty()){
+            b.list.setVisibility(View.GONE);
+            b.noItemsTV.setVisibility(View.VISIBLE);
+        }
     }
 
     /**
@@ -156,7 +211,7 @@ public class MainActivity extends AppCompatActivity implements ItemHelper.OnComp
             allItems = new ArrayList<>();
             b.noItemsTV.setVisibility(View.VISIBLE);
         }
-        }
+    }
 
         /**
      * This method will show the add image option in our main activity.
@@ -197,6 +252,7 @@ public class MainActivity extends AppCompatActivity implements ItemHelper.OnComp
         return true;
     }
 
+
     /**
      * The below method will show the Dialog box.
      * @param item
@@ -210,6 +266,22 @@ public class MainActivity extends AppCompatActivity implements ItemHelper.OnComp
         }
         if(item.getItemId() == R.id.sort){
             sortList();
+            return true;
+        }
+        if(item.getItemId() == R.id.dragHandle){
+            if(checkDragHandle){
+                setUpOnLongClickListener();
+                Toast.makeText(this, "Drag and drop disabled", Toast.LENGTH_SHORT).show();
+                checkDragHandle = false;
+                itemTouchHelper.attachToRecyclerView(null);
+                //itemTouchHelper = new ItemTouchHelper(new SwipeToDeleteCallback(adapter, this));
+                //onLongForActionBar();
+            }
+            else {
+                Toast.makeText(this, "Drag and drop Enabled", Toast.LENGTH_SHORT).show();
+                checkDragHandle = true;
+                itemTouchHelper.attachToRecyclerView(b.list);
+            }
             return true;
         }
         return false;
@@ -239,6 +311,7 @@ public class MainActivity extends AppCompatActivity implements ItemHelper.OnComp
         }
     }
 
+
     /**
      * The below method will call another method and item will be passed which will be added accordingly
      * into the recycler view.
@@ -262,14 +335,16 @@ public class MainActivity extends AppCompatActivity implements ItemHelper.OnComp
                 });
     }
 
+
     /**
      * This method will call adapter of ItemAdapter to add the card into the recycler view.
      *
      */
     private void setUpRecyclerView(){
+        b.list.setVisibility(View.VISIBLE);
         b.noItemsTV.setVisibility(View.GONE);
         if(adapter == null){
-            adapter = new ItemAdapter(this, allItems);
+            adapter = new ItemAdapter(this, allItems, this);
         }else{
             adapter.itemsList = allItems;
         }
@@ -283,7 +358,7 @@ public class MainActivity extends AppCompatActivity implements ItemHelper.OnComp
      * recycler view.
      */
     private void itemRemove() {
-        itemTouchHelper = new ItemTouchHelper(new SwipeToDeleteCallback(adapter));
+        itemTouchHelper = new ItemTouchHelper(new SwipeToDeleteCallback(adapter, this));
         adapter.notifyDataSetChanged();
         itemTouchHelper.attachToRecyclerView(b.list);
     }
@@ -370,5 +445,10 @@ public class MainActivity extends AppCompatActivity implements ItemHelper.OnComp
     @Override
     public void onError(String error) {
 
+    }
+
+    @Override
+    public void position(int position) {
+        this.position = position;
     }
 }

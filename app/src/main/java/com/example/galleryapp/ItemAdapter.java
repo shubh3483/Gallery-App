@@ -1,13 +1,18 @@
 package com.example.galleryapp;
 
 import android.content.Context;
+import android.view.ContextMenu;
 import android.view.LayoutInflater;
+import android.view.MenuInflater;
+import android.view.View;
 import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
+import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
+import com.example.galleryapp.databinding.ActivityMainBinding;
 import com.example.galleryapp.databinding.ItemCardBinding;
 import com.example.galleryapp.models.Item;
 
@@ -20,6 +25,10 @@ public class ItemAdapter extends RecyclerView.Adapter<ItemAdapter.ItemViewHolder
     private Context context;
     String finalUriOrUrl = "";
     List<Item> itemsList, requiredNewItemList;
+    ActivityMainBinding b;
+    onClickListener listener;
+    onLongItemClickListener mOnLongItemClickListener;
+    //public int lastSelected;
 
     /**
      * This is needed when we are filtering to avoid reference issues.
@@ -36,11 +45,14 @@ public class ItemAdapter extends RecyclerView.Adapter<ItemAdapter.ItemViewHolder
      * @param context
      * @param itemsList
      */
-    public ItemAdapter(Context context, List<Item> itemsList){
+    public ItemAdapter(Context context, List<Item> itemsList, onClickListener listener){
         this.itemsList = itemsList;
         requiredNewItemList = itemsList;
         this.context = context;
+        this.listener = listener;
+        b = ActivityMainBinding.inflate(LayoutInflater.from(context));
     }
+
 
     @NonNull
     @Override
@@ -53,6 +65,8 @@ public class ItemAdapter extends RecyclerView.Adapter<ItemAdapter.ItemViewHolder
     @Override
     public void onBindViewHolder(@NonNull ItemAdapter.ItemViewHolder holder, int position) {
 
+
+        ItemCardBinding tempBinding = ((ItemViewHolder)holder).b;
         Item item = requiredNewItemList.get(position);
         finalUriOrUrl = checkUrlOrURi(item);
         Glide.with(context)
@@ -60,7 +74,47 @@ public class ItemAdapter extends RecyclerView.Adapter<ItemAdapter.ItemViewHolder
                 .into(holder.b.imageView);
         holder.b.title.setText(item.label);
         holder.b.title.setBackgroundColor(item.color);
+        holder.itemView.setOnLongClickListener(new View.OnLongClickListener() {
+            @Override
+            public boolean onLongClick(View v) {
+                //lastSelected = holder.getAdapterPosition();
+                if (mOnLongItemClickListener != null) {
+                    mOnLongItemClickListener.ItemLongClicked(v, position);
+                    return true;
+                }
+                return false;
+            }
+        });
+        //tempMethod(tempBinding.getRoot());
+        /*holder.itemView.setOnLongClickListener(new View.OnLongClickListener() {
+            @Override
+            public boolean onLongClick(View v) {
+                if (mOnLongItemClickListener != null) {
+                    mOnLongItemClickListener.ItemLongClicked(v, position);
+                }
+
+                return true;
+            }
+        });*/
+        /*TODO : holder.b.cardShareBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                listener.position(position);
+            }
+        });*/
+
     }
+
+    /*private void tempMethod(ConstraintLayout tempBinding) {
+        tempBinding.setOnCreateContextMenuListener(new View.OnCreateContextMenuListener() {
+            @Override
+            public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo) {
+                MainActivity activity = (MainActivity)context;
+                //activity.getMenuInflater();
+                activity.getMenuInflater().inflate(R.menu.context_menu, menu);
+            }
+        });
+    }*/
 
     private String checkUrlOrURi(Item item) {
         if(item.imageRedirectedUrl != null){
@@ -112,11 +166,35 @@ public class ItemAdapter extends RecyclerView.Adapter<ItemAdapter.ItemViewHolder
         notifyItemMoved(fromPosition, toPosition);
     }
 
-    static class ItemViewHolder extends RecyclerView.ViewHolder{
+    static class ItemViewHolder extends RecyclerView.ViewHolder /*implements View.OnLongClickListener, View.OnCreateContextMenuListener*/ {
         ItemCardBinding b;
         public ItemViewHolder(ItemCardBinding b){
             super(b.getRoot());
             this.b = b;
+            //this.b.imageView.setOnCreateContextMenuListener(this);
         }
+
+        /*@Override
+        public boolean onLongClick(View v) {
+            return false;
+        }*/
+
+        /*@Override
+        public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo) {
+            MenuInflater inflater = ((MainActivity) context).getMenuInflater();
+            inflater.inflate(R.menu.context_menu, menu);
+        }*/
+    }
+
+    public void setOnLongItemClickListener(onLongItemClickListener mOnLongItemClickListener) {
+        this.mOnLongItemClickListener = mOnLongItemClickListener;
+    }
+
+    public interface onLongItemClickListener {
+        void ItemLongClicked(View v, int position);
+    }
+
+    interface onClickListener {
+        void position(int position);
     }
 }

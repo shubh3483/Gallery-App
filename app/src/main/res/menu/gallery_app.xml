@@ -13,6 +13,11 @@
         app:showAsAction="always"
         android:icon="@drawable/ic_sort"/>
 
+    <item android:id="@+id/dragHandle"
+        android:icon="@drawable/ic_drag_handle"
+        app:showAsAction="always"
+        android:title="Handle drag and drop"/>
+
     <item android:id="@+id/addImage"
         android:icon="@drawable/ic_add_image"
         app:showAsAction="always"
