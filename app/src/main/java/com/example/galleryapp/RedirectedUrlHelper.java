@@ -31,48 +31,13 @@ public class RedirectedUrlHelper extends AsyncTask<String, Void, String> {
 
         String secondURL = "";
         try {
-            /*URL urlTmp = null;
-            HttpURLConnection connection = null;
-
-            try {
-                urlTmp = new URL(url[0]);
-            } catch (MalformedURLException e1) {
-                e1.printStackTrace();
-            }
-
-            try {
-                connection = (HttpURLConnection) urlTmp.openConnection();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-            try {
-                connection.getResponseCode();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-
-            secondURL = connection.getURL().toString();
-            connection.disconnect();*/
-
-            //This one line will give us the redirected URL.
-            System.out.println(" BEFORE TIME" + getDateTimeFromTimeStamp());
             Response response = Jsoup.connect(url[0]).ignoreContentType(true).execute();
-
-            //System.out.println(response.statusCode() + " : " + response.url().toString());
             secondURL = response.url().toString();
-            System.out.println("AFTER TIME" + getDateTimeFromTimeStamp());
         }
         catch (Exception ex) {
             ex.printStackTrace();
         }
         return secondURL;
-    }
-
-    public static String getDateTimeFromTimeStamp() {
-        SimpleDateFormat dateFormat = new SimpleDateFormat(DATE_FORMAT_1);
-        dateFormat.setTimeZone(TimeZone.getTimeZone("UTC+5"));
-        Date today = Calendar.getInstance().getTime();
-        return dateFormat.format(today);
     }
 
     protected void onPostExecute(String secondURL) {

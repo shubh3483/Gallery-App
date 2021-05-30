@@ -5,13 +5,18 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Environment;
+import android.provider.MediaStore;
 import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
 
 import com.example.galleryapp.databinding.ActivityMainBinding;
+import com.example.galleryapp.databinding.ItemCardBinding;
 import com.example.galleryapp.models.Item;
 import com.google.android.material.card.MaterialCardView;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
@@ -47,61 +52,37 @@ public class ContextMenuHandler implements ItemHelper.OnCompleteListener, Galler
         this.context = context;
     }
 
-    public void takeScreenshot(int position) {
-        Date now = new Date();
-        android.text.format.DateFormat.format("yyyy-MM-dd_hh:mm:ss", now);
 
-        try {
-
-            String mPath = Environment.getExternalStorageDirectory().toString() + "/" + now + ".jpeg";
-
-            //View v2 = findViewById(R.id.parentCard);
-            System.out.println("POSITION IS " + position);
-            View v1 = Objects.requireNonNull(b.list.findViewHolderForAdapterPosition(position)).itemView.getRootView();
-            v1.setDrawingCacheEnabled(false);
-            MaterialCardView materialCardView = v1.findViewById(R.id.parentCard);
-            int totalHeight = materialCardView.getChildAt(0).getHeight();
-            int totalWidth = materialCardView.getChildAt(0).getWidth();
-            v1.layout(0, 0, totalWidth, totalHeight);
-            v1.buildDrawingCache(true);
-            Bitmap bitmap = Bitmap.createBitmap(v1.getDrawingCache());
-            v1.setDrawingCacheEnabled(false);
-
-            File imageFile = new File(mPath);
-
-            FileOutputStream outputStream = new FileOutputStream(imageFile);
-            int quality = 100;
-            bitmap.compress(Bitmap.CompressFormat.JPEG, quality, outputStream);
-            outputStream.flush();
-            outputStream.close();
-
-            //setting screenshot in imageview
-            String filePath = imageFile.getPath();
-
-            Bitmap ssbitmap = BitmapFactory.decodeFile(imageFile.getAbsolutePath());
-            //iv.setImageBitmap(ssbitmap);
-            sharePath = filePath;
-            share(sharePath);
-
-        } catch (Throwable e) {
-            // Several error may come out with file handling or DOM
-            e.printStackTrace();
-        }
+    /**
+     * This method is for sharing the card image.
+     * @param binding
+     */
+    void shareImage(ItemCardBinding binding) {
+        Bitmap bitmap = getBitmapFromView(binding.getRoot());
+        String bitmapPath = MediaStore.Images.Media.insertImage(context.getContentResolver(), bitmap, "palette", "share palette");
+        Uri bitmapUri = Uri.parse(bitmapPath);
+        //Intent to send image
+        Intent intent = new Intent(Intent.ACTION_SEND);
+        intent.setType("image/png");
+        intent.putExtra(Intent.EXTRA_STREAM, bitmapUri);
+        context.startActivity(Intent.createChooser(intent, "Share"));
     }
 
-    private void share(String sharePath){
-
-        if(!sharePath.equals("no")) {
-            Log.d("ffff", sharePath);
-            File file = new File(sharePath);
-            Uri uri = Uri.fromFile(file);
-            Intent intent = new Intent(Intent.ACTION_SEND);
-            intent.setType("image/*");
-            intent.putExtra(Intent.EXTRA_STREAM, uri);
-            context.startActivity(intent);
-        }else{
-            System.out.println("NOT WORKING");
-        }
+    /**
+     * This method is for converting the view to bitmap
+     * @param view
+     * @return
+     */
+    public Bitmap getBitmapFromView(View view) {
+        Bitmap returnedBitmap = Bitmap.createBitmap(view.getWidth(), view.getHeight(),Bitmap.Config.ARGB_8888);
+        Canvas canvas = new Canvas(returnedBitmap);
+        Drawable bgDrawable =view.getBackground();
+        if (bgDrawable!=null)
+            bgDrawable.draw(canvas);
+        else
+            canvas.drawColor(Color.WHITE);
+        view.draw(canvas);
+        return returnedBitmap;
     }
 
     /**

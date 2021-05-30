@@ -4,19 +4,12 @@ import android.Manifest;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Environment;
-import android.view.ActionMode;
-import android.view.ContextMenu;
 import android.view.Menu;
-import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.ImageView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -25,24 +18,17 @@ import androidx.appcompat.widget.SearchView;
 import androidx.core.app.ActivityCompat;
 import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.galleryapp.databinding.ActivityMainBinding;
+import com.example.galleryapp.databinding.ItemCardBinding;
 import com.example.galleryapp.models.Item;
-import com.google.android.material.card.MaterialCardView;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Date;
 import java.util.List;
-import java.util.Objects;
 import java.util.Set;
 
 public class MainActivity extends AppCompatActivity implements ContextMenuHandler.EditItem, ContextMenuHandler.DeleteItem, ItemHelper.OnCompleteListener, GalleryImageUploader.OnCompleteListener, ItemAdapter.onClickListener {
@@ -58,8 +44,6 @@ public class MainActivity extends AppCompatActivity implements ContextMenuHandle
     private boolean checkDragHandle = true;
     private int mCurrentItemPosition = -1;
     ContextMenuHandler contextMenuHandler = new ContextMenuHandler(this, this, this);
-    //int position;
-    private String sharePath = "no";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -95,7 +79,8 @@ public class MainActivity extends AppCompatActivity implements ContextMenuHandle
 
         if (id == R.id.shareItem) {
             Toast.makeText(this, "Sharing", Toast.LENGTH_SHORT).show();
-            contextMenuHandler.takeScreenshot(mCurrentItemPosition);
+            ItemCardBinding binding = adapter.itemCardBinding;
+            contextMenuHandler.shareImage(binding);
         }
 
         if(id == R.id.deleteItem) {
@@ -153,7 +138,6 @@ public class MainActivity extends AppCompatActivity implements ContextMenuHandle
      * This method will prevent loss of data when the app is completely stopped.
      */
     private void sharedPreferences() {
-        //b.noItemsTV.setVisibility(View.GONE);
         SharedPreferences preferences = getPreferences(MODE_PRIVATE);
         String json = preferences.getString(Constants.ALL_ITEMS, null);
         allItems = gson.fromJson(json, new TypeToken<List<Item>>() {

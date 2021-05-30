@@ -115,13 +115,10 @@ public class GalleryImageUploader {
      * @param labels
      */
     void showData(Uri uri, Set<Integer> colors, List<String> labels, boolean isEdit) {
-        //this.image = image;
-        //this.redirectedUrl = redirectedUrl;
         Glide.with(context)
                 .asBitmap()
                 .load(uri)
                 .into(b.imageView);
-        //b.imageView.setImageBitmap(image);
         inflateLabelChips(labels, isEdit);
         inflateColourChips(colors, isEdit);
         b.mainRoot.setVisibility(View.VISIBLE);
@@ -176,23 +173,6 @@ public class GalleryImageUploader {
 
                                 }
                             });
-                    /*Intent sharingIntent = new Intent(android.content.Intent.ACTION_SEND);
-                    //String path = MediaStore.Images.Media.insertImage(context.getContentResolver(), image, "", null);
-                    Uri uri =  Uri.parse( redirectedUrl );
-                    //sharingIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_WHEN_TASK_RESET);
-                    sharingIntent.setType("image/jpeg");
-                    sharingIntent.setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-
-                    sharingIntent.putExtra(Intent.EXTRA_STREAM, uri);
-
-                    context.startActivity(Intent.createChooser(sharingIntent,"Share via"));*/
-
-                    /*Intent shareIntent =   new Intent(android.content.Intent.ACTION_SEND);
-                    shareIntent.setType("text/plain");
-                    shareIntent.putExtra(Intent.EXTRA_SUBJECT,"Insert Subject here");
-                    String app_url = redirectedUrl;
-                    shareIntent.putExtra(android.content.Intent.EXTRA_TEXT,app_url);
-                    context.startActivity(Intent.createChooser(shareIntent, "Share via"));*/
                 } catch (Exception e) {
                     Log.e("Error on sharing", e + " ");
                     Toast.makeText(context, "App not Installed", Toast.LENGTH_SHORT).show();

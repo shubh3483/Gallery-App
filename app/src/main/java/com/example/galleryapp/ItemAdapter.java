@@ -29,6 +29,7 @@ public class ItemAdapter extends RecyclerView.Adapter<ItemAdapter.ItemViewHolder
     int position = 0;
     onClickListener listener;
     boolean checkDragHandle;
+    ItemCardBinding itemCardBinding;
 
     /**
      * This is needed when we are filtering to avoid reference issues.
@@ -100,6 +101,7 @@ public class ItemAdapter extends RecyclerView.Adapter<ItemAdapter.ItemViewHolder
                 inflater.inflate(R.menu.context_menu, menu);
                 position = getAdapterPosition();
                 listener.position(position);
+                itemCardBinding = b;
             }
         }
     }
@@ -162,14 +164,6 @@ public class ItemAdapter extends RecyclerView.Adapter<ItemAdapter.ItemViewHolder
         }
         notifyItemMoved(fromPosition, toPosition);
     }
-
-    /*public void setOnLongItemClickListener(onLongItemClickListener mOnLongItemClickListener) {
-        this.mOnLongItemClickListener = mOnLongItemClickListener;
-    }
-
-    public interface onLongItemClickListener {
-        void ItemLongClicked(View v, int position);
-    }*/
 
     /**
      * This will send the callback to the MainActivity about the position of the item for context menu.
