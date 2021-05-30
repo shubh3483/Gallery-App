@@ -21,5 +21,5 @@ Switch to 6.2.2 from here : https://github.com/shubh3483/Gallery-App/tree/6.2.2
 
 A video is also attached for the reference 
 
-
+https://user-images.githubusercontent.com/65455693/120113483-46167a00-c198-11eb-98cb-438d2ace3c86.mp4
 
