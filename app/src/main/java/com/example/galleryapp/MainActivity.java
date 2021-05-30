@@ -56,7 +56,6 @@ public class MainActivity extends AppCompatActivity implements ContextMenuHandle
     ItemTouchHelper itemTouchHelper;
     ItemAdapter adapter;
     private boolean checkDragHandle = true;
-    private ActionMode mActionMode;
     private int mCurrentItemPosition = -1;
     ContextMenuHandler contextMenuHandler = new ContextMenuHandler(this, this, this);
     //int position;
@@ -78,6 +77,11 @@ public class MainActivity extends AppCompatActivity implements ContextMenuHandle
         registerForContextMenu(b.list);
     }
 
+    /**
+     * This method will handle the option chosen by the user in the contextual menu.
+     * @param item
+     * @return
+     */
     @Override
     public boolean onContextItemSelected(MenuItem item) {
         int id = item.getItemId();
@@ -100,7 +104,6 @@ public class MainActivity extends AppCompatActivity implements ContextMenuHandle
         }
         return true;
     }
-
 
     /**
      * This method is to show no items in main activity when there are no items. Separate method is
@@ -243,10 +246,12 @@ public class MainActivity extends AppCompatActivity implements ContextMenuHandle
         if(item.getItemId() == R.id.dragHandle){
             if(checkDragHandle){
                 Toast.makeText(this, "Drag and drop disabled", Toast.LENGTH_SHORT).show();
+                itemTouchHelper.attachToRecyclerView(null);
                 checkDragHandle = false;
             }
             else {
                 Toast.makeText(this, "Drag and drop Enabled", Toast.LENGTH_SHORT).show();
+                itemTouchHelper.attachToRecyclerView(b.list);
                 checkDragHandle = true;
             }
             setUpRecyclerView();
@@ -329,7 +334,7 @@ public class MainActivity extends AppCompatActivity implements ContextMenuHandle
     private void itemRemove() {
         itemTouchHelper = new ItemTouchHelper(new SwipeToDeleteCallback(adapter, this));
         adapter.notifyDataSetChanged();
-        if(checkDragHandle)
+        if(!checkDragHandle)
         itemTouchHelper.attachToRecyclerView(null);
         else itemTouchHelper.attachToRecyclerView(b.list);
     }
@@ -369,6 +374,15 @@ public class MainActivity extends AppCompatActivity implements ContextMenuHandle
     }
 
     /**
+     * This method will add the edited item to the main list and will setup in the recycler view.
+     * @param item
+     */
+    private void editItem(Item item) {
+        allItems.add(mCurrentItemPosition, item);
+        setUpRecyclerView();
+    }
+
+    /**
      * This method will save the item card so that when the screen is rotated the data is not lost.
      */
     @Override
@@ -393,8 +407,7 @@ public class MainActivity extends AppCompatActivity implements ContextMenuHandle
     }
 
     /**
-     * All these below methods are the callbacks from the itemHelper and the galleryImageUploader
-     * classes.
+     * All these below methods are the callbacks from the itemHelper class.
      * @param uri
      * @param colors
      * @param labels
@@ -414,6 +427,10 @@ public class MainActivity extends AppCompatActivity implements ContextMenuHandle
 
     }
 
+    /**
+     * These 2 methods are the callback from the gallery uploader
+     * @param item
+     */
     @Override
     public void onGalleryImageAdded(Item item) {
 
@@ -444,13 +461,12 @@ public class MainActivity extends AppCompatActivity implements ContextMenuHandle
         deleteItem(position);
     }
 
+    /**
+     * This is the callback for editing the item along with the edited item.
+     * @param item
+     */
     @Override
     public void editedItemCallBack(Item item) {
         editItem(item);
-    }
-
-    private void editItem(Item item) {
-        allItems.add(mCurrentItemPosition, item);
-        setUpRecyclerView();
     }
 }

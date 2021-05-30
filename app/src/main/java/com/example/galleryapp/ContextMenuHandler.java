@@ -35,6 +35,12 @@ public class ContextMenuHandler implements ItemHelper.OnCompleteListener, Galler
     String previousItemLabel = null;
     EditItem editItemListener;
 
+    /**
+     * Constructor
+     * @param context
+     * @param deleteItemListener
+     * @param editItemListener
+     */
     public ContextMenuHandler(Context context, DeleteItem deleteItemListener, EditItem editItemListener) {
         this.deleteItemListener = deleteItemListener;
         this.editItemListener = editItemListener;
@@ -120,6 +126,10 @@ public class ContextMenuHandler implements ItemHelper.OnCompleteListener, Galler
         .show();
     }
 
+    /**
+     * This is the function which will be called first when the user selects the option for editing.
+     * @param item
+     */
     public void editItem(Item item){
 
         previousItemColor = item.color;
@@ -132,6 +142,12 @@ public class ContextMenuHandler implements ItemHelper.OnCompleteListener, Galler
     }
 
 
+    /**
+     * All these below functions are the callbacks received by this activity.
+     * @param uri
+     * @param colors
+     * @param labels
+     */
 
     @Override
     public void onFetched(Uri uri, Set<Integer> colors, List<String> labels) {
@@ -163,8 +179,9 @@ public class ContextMenuHandler implements ItemHelper.OnCompleteListener, Galler
 
     }
 
+
     /**
-     * This will send the callback to the MainActivity.
+     * This below two listeners will send the callback to the MainActivity.
      */
     interface DeleteItem{
         void deleteItemCallback(int position);

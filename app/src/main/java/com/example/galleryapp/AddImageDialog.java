@@ -71,6 +71,9 @@ public class AddImageDialog implements ItemHelper.OnCompleteListener {
             hideErrorsForET();
     }
 
+    /**
+     * This function is for hiding the errors of the TIL
+     */
     private void hideErrorsForET() {
         b.width.addTextChangedListener(new TextWatcher() {
             @Override
@@ -190,6 +193,16 @@ public class AddImageDialog implements ItemHelper.OnCompleteListener {
         handleShareImageEvent();
     }
 
+    /**
+     * This method is for editing the card.
+     * @param context
+     * @param redirectedUrl
+     * @param colors
+     * @param labels
+     * @param listener
+     * @param previousItemColor
+     * @param previousItemLabel
+     */
     public void showForEditData(Context context, String redirectedUrl, Set<Integer> colors,
                                 List<String> labels, OnCompleteListener listener, int previousItemColor, String previousItemLabel){
         if(context instanceof MainActivity){
@@ -356,21 +369,12 @@ public class AddImageDialog implements ItemHelper.OnCompleteListener {
      * @param labels
      */
 
-    /*private void inflateLabelChips(List<String> labels) {
-        for(String label : labels){
-            ChipLabelBinding binding = ChipLabelBinding.inflate(inflater);
-            binding.getRoot().setText(label);
-            b.labelChipGrp.addView(binding.getRoot());
-        }
-    }
-
-    private void inflateColourChips(Set<Integer> colors) {
-        for(int colour : colors){
-            ChipColourBinding binding = ChipColourBinding.inflate(inflater);
-            binding.getRoot().setChipBackgroundColor(ColorStateList.valueOf(colour));
-            b.colourPaletteChipGrp.addView(binding.getRoot());
-        }
-    }*/
+    /**
+     * These are the color and label inflaters and will work for both(for new card as well as for
+     * editing the card).
+     * @param labels
+     * @param isEdit
+     */
     private void inflateLabelChips(List<String> labels, boolean isEdit) {
         if(isEdit) {
             boolean labelChecker = false;
@@ -433,17 +437,17 @@ public class AddImageDialog implements ItemHelper.OnCompleteListener {
         }
     }
 
+    /**
+     * The below three methods are listener of ItemHelper class.
+     *
+     * @param colors
+     * @param labels
+     */
     @Override
     public void onFetched(Uri uri, Set<Integer> colors, List<String> labels) {
 
     }
 
-    /**
-     * The below two methods are listener of ItemHelper class.
-     *
-     * @param colors
-     * @param labels
-     */
     @Override
     public void onFetched(String redirectedUrl, Set<Integer> colors, List<String> labels) {
 
@@ -457,7 +461,7 @@ public class AddImageDialog implements ItemHelper.OnCompleteListener {
     }
 
     /**
-     * This is the listener for this activity.
+     * This will send the callback to the activities
      */
     interface OnCompleteListener{
         void onImageAdded(Item item);

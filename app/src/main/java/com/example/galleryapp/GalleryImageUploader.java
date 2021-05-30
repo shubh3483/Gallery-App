@@ -76,6 +76,16 @@ public class GalleryImageUploader {
 
     }
 
+    /**
+     * This method will handle the image editing which was uploaded from gallery.
+     * @param context
+     * @param uri
+     * @param colors
+     * @param labels
+     * @param listener
+     * @param previousItemColor
+     * @param previousItemLabel
+     */
     void showForEditData(Context context, Uri uri, Set<Integer> colors, List<String> labels, GalleryImageUploader.OnCompleteListener listener, int previousItemColor, String previousItemLabel ) {
         this.context = context;
         this.listener = listener;
