@@ -13,7 +13,7 @@ Functionalities :
 8) Drag and drop.
 9) Contextual menu
 
-Download Apk from here : https://github.com/shubh3483/Gallery-App/releases/download/v6.3/app-debug.apk
+Download Apk from here : https://github.com/shubh3483/Gallery-App/releases/download/v6.3.1/gallery-app.apk
 
 Switch to master branch : https://github.com/shubh3483/Gallery-App/tree/master
 
