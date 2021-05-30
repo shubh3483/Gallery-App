@@ -17,6 +17,7 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
+import androidx.core.content.FileProvider;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.target.CustomTarget;
@@ -28,6 +29,9 @@ import com.example.galleryapp.models.Item;
 import com.google.android.material.chip.Chip;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.OutputStream;
 import java.util.List;
 import java.util.Set;
@@ -59,7 +63,7 @@ public class GalleryImageUploader {
         this.context = context;
         this.listener = listener;
         this.uri = uri.toString();
-        b.addBtn.setText("ADD");
+
         if(context instanceof MainActivity){
             inflater = ((MainActivity) context).getLayoutInflater();
             b = DialogAddImageBinding.inflate(inflater);
@@ -72,6 +76,7 @@ public class GalleryImageUploader {
         dialog = new MaterialAlertDialogBuilder(context, R.style.CustomDialogTheme)
                 .setView(b.getRoot())
                 .show();
+        b.addBtn.setText("ADD");
         showData(uri, colors, labels,false);
 
     }
@@ -143,29 +148,29 @@ public class GalleryImageUploader {
                             .into(new CustomTarget<Bitmap>() {
                                 @Override
                                 public void onResourceReady(@NonNull Bitmap resource, @Nullable Transition<? super Bitmap> transition) {
-                                    // Calling the intent to share the bitmap
-                                    Bitmap icon = resource;
-                                    Intent share = new Intent(Intent.ACTION_SEND);
-                                    share.setType("image/jpeg");
-
-                                    ContentValues values = new ContentValues();
-                                    values.put(MediaStore.Images.Media.TITLE, "title");
-                                    values.put(MediaStore.Images.Media.MIME_TYPE, "image/jpeg");
-                                    Uri uri = context.getContentResolver().insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
-                                            values);
-
-
-                                    OutputStream outputStream;
                                     try {
-                                        outputStream = context.getContentResolver().openOutputStream(uri);
-                                        icon.compress(Bitmap.CompressFormat.JPEG, 100, outputStream);
-                                        outputStream.close();
-                                    } catch (Exception e) {
-                                        System.err.println(e.toString());
-                                    }
 
-                                    share.putExtra(Intent.EXTRA_STREAM, uri);
-                                    context.startActivity(Intent.createChooser(share, "Share Image"));
+                                        File cachePath = new File(context.getCacheDir(), "images");
+                                        cachePath.mkdirs(); // don't forget to make the directory
+                                        FileOutputStream stream = new FileOutputStream(cachePath + "/image.png"); // overwrites this image every time
+                                        resource.compress(Bitmap.CompressFormat.PNG, 100, stream);
+                                        stream.close();
+                                        File imagePath = new File(context.getCacheDir(), "images");
+                                        File newFile = new File(imagePath, "image.png");
+                                        Uri contentUri = FileProvider.getUriForFile(context, "com.example.galleryapp.fileprovider", newFile);
+
+                                        if (contentUri != null) {
+                                            Intent shareIntent = new Intent();
+                                            shareIntent.setAction(Intent.ACTION_SEND);
+                                            shareIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION); // temp permission for receiving app to read this file
+                                            shareIntent.setDataAndType(contentUri, context.getContentResolver().getType(contentUri));
+                                            shareIntent.putExtra(Intent.EXTRA_STREAM, contentUri);
+                                            context.startActivity(Intent.createChooser(shareIntent, "Choose an app"));
+                                        }
+
+                                    } catch (IOException e) {
+                                        e.printStackTrace();
+                                    }
                                 }
 
                                 @Override

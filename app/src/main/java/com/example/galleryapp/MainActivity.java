@@ -56,7 +56,6 @@ public class MainActivity extends AppCompatActivity implements ContextMenuHandle
         }else{
             sharedPreferences();
         }
-        permissionAccess();
         checkItemsEmptyOrNot();
         registerForContextMenu(b.list);
     }
@@ -98,39 +97,6 @@ public class MainActivity extends AppCompatActivity implements ContextMenuHandle
         if(allItems.isEmpty()){
             b.list.setVisibility(View.GONE);
             b.noItemsTV.setVisibility(View.VISIBLE);
-        }
-    }
-
-    /**
-     * This below code is for granting permission so that we do not encounter permission denied
-     * exception while running the app.
-     */
-    private void permissionAccess() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-
-            int hasWritePermission = checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE);
-            int hasReadPermission = checkSelfPermission(Manifest.permission.READ_EXTERNAL_STORAGE);
-
-            List<String> permissions = new ArrayList<String>();
-            if (hasWritePermission != PackageManager.PERMISSION_GRANTED) {
-                permissions.add(Manifest.permission.WRITE_EXTERNAL_STORAGE);
-            } else {
-//              preferencesUtility.setString("storage", "true");
-            }
-
-            if (hasReadPermission != PackageManager.PERMISSION_GRANTED) {
-                permissions.add(Manifest.permission.READ_EXTERNAL_STORAGE);
-
-            } else {
-//              preferencesUtility.setString("storage", "true");
-            }
-
-            if (!permissions.isEmpty()) {
-//              requestPermissions(permissions.toArray(new String[permissions.size()]), REQUEST_CODE_SOME_FEATURES_PERMISSIONS);
-
-                ActivityCompat.requestPermissions(this, new String[] {Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.READ_PHONE_STATE},
-                        REQUEST_PERMISSION);
-            }
         }
     }
 
